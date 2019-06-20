@@ -1,5 +1,7 @@
 package com.github.slivermasterz;
 
+import java.util.Collections;
+
 /**
  * WordTree uses a Trie structure in order to get an O(n) contains method.
  * Where n is the length of the String word.
@@ -30,9 +32,9 @@ public class WordTree {
     }
 
     /**
-     *
-     * @param value
-     * @return
+     * Checks if a String is inside the tree
+     * @param value String to be checked
+     * @return true if in tree, false otherwise
      */
     public boolean contains(String value) {
         int index;
@@ -53,19 +55,36 @@ public class WordTree {
         int index;
         Node node = root;
         for (int i = 0; i < value.length(); i++) {
-            char c = value.charAt(i);
-            index = convertToIndex(c);
+            index = convertToIndex(value.charAt(i));
             if (node.childIndex[index] == -1) {
                 node.add(index);
             }
-            node.numWords += 1;
             node = node.getChild(index);
+            node.numWords += 1;
         }
         node.value = value;
+        root.numWords += 1;
     }
 
     public boolean delete(String value) {
-        return false;
+        if (!contains(value)) {
+            return false;
+        }
+
+        int index;
+        Node node = root;
+        Node child;
+        for (int i = 0; i < value.length(); i++) {
+            index = convertToIndex(value.charAt(i));
+            child = node.getChild(index);
+            child.numWords -= 1;
+            if (child.numWords == 0) {
+                node.remove(index);
+            }
+            node = child;
+        }
+        node.value = "";
+        return true;
     }
 
     public int convertToIndex(char c) {
@@ -79,32 +98,36 @@ public class WordTree {
         }
         return c;
     }
-
-    public static void main(String[] args) {
-        WordTree tree = new WordTree();
-        tree.insert("there");
-        System.out.println(tree.contains("there"));
-    }
 }
 
 class Node {
     java.util.ArrayList<Node> children;
-    int childIndex[];
+    byte childIndex[];
     String value;
+    byte index;
     int numWords; //number of words traversing this node
 
     public Node(String value) {
         this.value = value;
         children = new java.util.ArrayList<Node>(2);
-        childIndex = new int[(96-32) + 4]; //includes SPACE to ` on ASCII plus {|}~
-        java.util.Arrays.fill(childIndex,-1);
+        childIndex = new byte[(96-32) + 4]; //includes SPACE to ` on ASCII plus {|}~
+        java.util.Arrays.fill(childIndex,(byte)-1);
         numWords = 0;
     }
 
-
     public void add(int index) {
         children.add(new Node(""));
-        childIndex[index] = children.size()-1;
+        childIndex[index] = (byte) (children.size()-1);
+        this.index = (byte) index;
+    }
+
+    public Node remove(int index) {
+        if (childIndex[index] != children.size() - 1) {
+            Collections.swap(children, children.size() - 1, childIndex[index]);
+            childIndex[children.get(index).index] = (byte) childIndex[index];
+        }
+        childIndex[index] = -1;
+        return children.remove(children.size() - 1);
     }
 
     public Node getChild(int index) {
@@ -114,4 +137,5 @@ class Node {
     public boolean contains(int index) {
         return childIndex[index] >= 0;
     }
+
 }

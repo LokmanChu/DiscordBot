@@ -49,6 +49,28 @@ public class WordTreeTest {
     }
 
     @Test
+    public void removeTestCaseOne() {
+        WordTree tree = new WordTree();
+        tree.insert("there");
+        tree.insert("the");
+        tree.delete("there");
+        assertEquals(2,tree.root.numWords, "words == 1");
+        assertTrue(tree.contains("the"),"the still exists");
+        assertFalse(tree.contains("there"), "there does not exist");
+    }
+
+    @Test
+    public void removeTestCaseTwo() {
+        WordTree tree = new WordTree();
+        tree.insert("there");
+        tree.insert("the");
+        tree.delete("the");
+        assertEquals(2,tree.root.numWords, "words == 1");
+        assertTrue(tree.contains("there"),"there still exists");
+        assertFalse(tree.contains("the"), "the does not exist");
+    }
+
+    @Test
     public void sizeTest() {
         WordTree tree = new WordTree();
         tree.insert("there");
@@ -56,4 +78,5 @@ public class WordTreeTest {
         tree.insert("the");
         assertEquals(2,tree.size(),"size == 2");
     }
+
 }
