@@ -23,16 +23,17 @@ public class WordTreeTest {
         WordTree tree = new WordTree();
         //inserts word THERE
         Node node = tree.root;
-        node.children[52] = new Node("");
-        node = node.children[52];
-        node.children[40] = new Node( "");
-        node = node.children[40];
-        node.children[37] = new Node( "");
-        node = node.children[37];
-        node.children[50] = new Node( "");
-        node = node.children[50];
-        node.children[37] = new Node( "there");
-        node = node.children[37];
+        node.add(52);
+        node = node.getChild(52);
+        node.add(40);
+        node = node.getChild(40);
+        node.add(37);
+        node = node.getChild(37);
+        node.add(50);
+        node = node.getChild(50);
+        node.add(37);
+        node = node.getChild(37);
+        node.value = "there";
 
         assertTrue(tree.contains("there"),"there");
         assertFalse(tree.contains("the"),"the");
