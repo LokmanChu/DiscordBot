@@ -12,7 +12,8 @@ public class Main {
         DiscordApi api = new DiscordApiBuilder().setToken(token).login().join(); //login
 
         api.addMessageCreateListener(event -> {
-            if (event.getMessage().getContent().equalsIgnoreCase("!ping")) {
+            String msg = event.getMessage().getContent();
+            if (msg.equalsIgnoreCase("!listBlacklist")) {
                 event.getChannel().sendMessage("Pong!");
             }
         });

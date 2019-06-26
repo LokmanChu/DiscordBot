@@ -1,5 +1,6 @@
 package com.github.slivermasterz;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 
 /**
@@ -51,6 +52,10 @@ public class WordTree {
         return !node.value.equals("");
     }
 
+    /**
+     * Insert String into tree
+     * @param value String to be inserted
+     */
     public void insert(String value) {
         int index;
         Node node = root;
@@ -66,6 +71,12 @@ public class WordTree {
         root.numWords += 1;
     }
 
+
+    /**
+     * Delete String from tree
+     * @param value String to be deleted
+     * @return true if String has been deleted, false if the String could not be found
+     */
     public boolean delete(String value) {
         if (!contains(value)) {
             return false;
@@ -87,6 +98,25 @@ public class WordTree {
         return true;
     }
 
+    //TODO: Add traverse method
+    public void traverse(Node node, Object obj, Method function) {
+        if (!node.value.equals("")) {
+            try {
+                function.invoke(obj,node.value);
+            }
+            catch (Exception ex) {
+                System.out.println(ex);
+            }
+        }
+
+        if (!node.sorted) {
+            node.sort();
+        }
+        for (Node child : node.children) {
+            traverse(child, obj, function);
+        }
+    }
+
     public int convertToIndex(char c) {
         if (c >= 32)
         {
@@ -106,6 +136,7 @@ class Node {
     String value;
     byte index;
     int numWords; //number of words traversing this node
+    boolean sorted;
 
     public Node(String value) {
         this.value = value;
@@ -113,12 +144,29 @@ class Node {
         childIndex = new byte[(96-32) + 4]; //includes SPACE to ` on ASCII plus {|}~
         java.util.Arrays.fill(childIndex,(byte)-1);
         numWords = 0;
+        sorted = false;
     }
 
     public void add(int index) {
-        children.add(new Node(""));
+        Node node = new Node("");
+        children.add(node);
         childIndex[index] = (byte) (children.size()-1);
-        this.index = (byte) index;
+        node.index = (byte) index;
+        sorted = false;
+    }
+
+    public void addSorted(int index) {
+        Node node = new Node("");
+        int i;
+        for (i = 0; i < children.size(); i++) {
+            if (index < children.get(i).index) {
+                children.add(i,node);
+                break;
+            }
+        }
+        reindex(i+1);
+        node.index = (byte) index;
+        sorted = true;
     }
 
     public Node remove(int index) {
@@ -136,6 +184,46 @@ class Node {
 
     public boolean contains(int index) {
         return childIndex[index] >= 0;
+    }
+
+    public boolean isInOrder() {
+        int left = -1;
+        int right;
+        for (Node n : children) {
+            right = n.index;
+            if (right < left) {
+                sorted = false;
+                return false;
+            }
+        }
+        sorted = true;
+        return sorted;
+    }
+
+    public void sort() {
+        for (int i = 1; i < children.size(); i++) {
+            Node node = children.get(i);
+            int j = i - 1;
+
+            while (j >= 0 && children.get(j).index > node.index) {
+                children.set(j+1,children.get(j));
+                j--;
+            }
+            children.set(j+1,node);
+        }
+
+        reindex();
+        sorted = true;
+    }
+
+    public void reindex() {
+        reindex(0);
+    }
+
+    public void reindex(int n) {
+        for (int i = n; i < children.size(); i++) {
+            childIndex[children.get(i).index] = (byte) i;
+        }
     }
 
 }

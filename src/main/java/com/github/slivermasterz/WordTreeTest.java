@@ -79,4 +79,19 @@ public class WordTreeTest {
         assertEquals(2,tree.size(),"size == 2");
     }
 
+    @Test
+    public void sortTest() {
+        Node n = new Node("");
+        n.add(60);
+        n.add(23);
+        n.add(13);
+        n.add(62);
+        n.sort();
+        assertEquals(13,n.children.get(0).index);
+        assertEquals(23,n.children.get(1).index);
+        assertEquals(60,n.children.get(2).index);
+        assertEquals(62,n.children.get(3).index);
+        assertTrue(n.sorted);
+    }
+
 }
