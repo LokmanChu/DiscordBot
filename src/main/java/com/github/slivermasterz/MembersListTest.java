@@ -1,10 +1,13 @@
-package com.github.aqml15.discordbot;
+package com.github.aqml15;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-public class ReportsListTest {
+import com.github.aqml15.discordbot.MembersList;
+
+public class MembersListTest {
 
 	@Test
 	public void sizeTest() {

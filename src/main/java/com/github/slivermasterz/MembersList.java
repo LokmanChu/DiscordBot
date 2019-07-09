@@ -1,5 +1,10 @@
 package com.github.aqml15.discordbot;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Map;
@@ -12,8 +17,9 @@ import java.util.TreeMap;
 public class MembersList implements Serializable {
 
 	private static final long serialVersionUID = -921260427607624568L;
-	Map<String, Integer> treeMap;
+	static Map<String, Integer> treeMap;
 	int id;
+	static String reportsPath = "src/data/reportsList.ser";
 	
 	class StringComparator implements Comparator<String>, Serializable {
 		
@@ -86,4 +92,40 @@ public class MembersList implements Serializable {
 		return print;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public Boolean lastSave() {
+		Boolean success = true;
+		try {
+        	FileInputStream fileIn = new FileInputStream(reportsPath);
+        	ObjectInputStream in = new ObjectInputStream(fileIn);
+        	treeMap = (Map<String, Integer>) in.readObject();
+        	in.close();
+        	fileIn.close();
+        	System.out.println("Members List found!");
+        } catch (ClassNotFoundException c) {
+        	System.out.println("Members List not found");
+        	success = false;
+        	//c.printStackTrace();
+        } catch (IOException i) {
+        	System.out.println("Members List not found");
+        	success = false;
+        	//i.printStackTrace();
+        }
+        
+        if (!success) {
+        	try {
+        		FileOutputStream fileOut = new FileOutputStream(reportsPath);
+        		ObjectOutputStream out = new ObjectOutputStream(fileOut);
+        		out.writeObject(treeMap);
+        		out.close();
+        		fileOut.close();
+        		System.out.println("Members List was saved into " + reportsPath);
+        	} catch (IOException i) {
+        		System.out.println("Save failed...");
+        		i.printStackTrace();
+        	}
+        }
+        
+        return success;
+	}
 }
