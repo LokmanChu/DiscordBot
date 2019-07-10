@@ -2,6 +2,12 @@ package com.github.slivermasterz;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -92,6 +98,44 @@ public class WordTreeTest {
         assertEquals(60,n.children.get(2).index);
         assertEquals(62,n.children.get(3).index);
         assertTrue(n.sorted);
+    }
+
+    @Test
+    public void traversalTest() throws java.io.IOException {
+        WordTree tree = new WordTree();
+        PipedOutputStream pos = new PipedOutputStream();
+        PipedInputStream pis = new PipedInputStream();
+        pis.connect(pos);
+        String arr[] = {"aatrox","apple", "arabic", "arrest", "grape","zoo"};
+        ArrayList<String> expectedList = new ArrayList<String>(6);
+        expectedList.addAll(Arrays.asList(arr));
+        tree.insert("grape");
+        tree.insert("apple");
+        tree.insert("arabic");
+        tree.insert("aatrox");
+        tree.insert("arrest");
+        tree.insert("zoo");
+        ArrayList<String> resultList = new ArrayList<String>(6);
+        try {
+            tree.traverse(tree.root,pos);
+        }
+        catch (Exception ex) {
+
+        }
+        pos.close();
+        int val = -1;
+        String temp = "";
+        while ((val = pis.read())!=-1) {
+            if (val == 10) {
+                resultList.add(temp);
+                temp = "";
+            }
+            else {
+                temp += (char) val;
+            }
+        }
+        pis.close();
+        assertEquals(expectedList,resultList);
     }
 
 }

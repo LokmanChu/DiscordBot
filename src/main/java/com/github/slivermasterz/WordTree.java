@@ -1,6 +1,9 @@
 package com.github.slivermasterz;
 
+import java.io.PipedOutputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collections;
 
 /**
@@ -10,9 +13,11 @@ import java.util.Collections;
 public class WordTree {
 
     Node root;
+    boolean writeLock;
 
     public WordTree() {
         root = new Node("");
+        writeLock = false;
     }
 
     /**
@@ -52,11 +57,39 @@ public class WordTree {
         return !node.value.equals("");
     }
 
+    public ArrayList<String> messageContains(String msg) {
+        ArrayList<String> list = new ArrayList<String>(1);
+
+        int i = 0;
+        Node node = root;
+        while (i < msg.length()) {
+            int index = convertToIndex(msg.charAt(i));
+            if (node.contains(index)) {
+                node = node.getChild(index);
+                if (!node.value.equals("") && msg.charAt(i+1) == ' ') {
+                    list.add(node.value);
+                }
+            }
+            else {
+                while (msg.charAt(i)!= ' ' || msg.charAt(i)!='\n') i++;
+                i++;
+                node = root;
+            }
+
+            i++;
+        }
+
+        return list;
+    }
+
     /**
      * Insert String into tree
      * @param value String to be inserted
      */
-    public void insert(String value) {
+    public boolean insert(String value) {
+        if (writeLock) {
+            return false;
+        }
         int index;
         Node node = root;
         for (int i = 0; i < value.length(); i++) {
@@ -69,6 +102,26 @@ public class WordTree {
         }
         node.value = value;
         root.numWords += 1;
+        return true;
+    }
+
+    public boolean insertSorted(String value) {
+        if (writeLock) {
+            return false;
+        }
+        int index;
+        Node node = root;
+        for (int i = 0; i < value.length(); i++) {
+            index = convertToIndex(value.charAt(i));
+            if (node.childIndex[index] == -1) {
+                node.addSorted(index);
+            }
+            node = node.getChild(index);
+            node.numWords += 1;
+        }
+        node.value = value;
+        root.numWords += 1;
+        return true;
     }
 
 
@@ -79,6 +132,9 @@ public class WordTree {
      */
     public boolean delete(String value) {
         if (!contains(value)) {
+            return false;
+        }
+        if (writeLock) {
             return false;
         }
 
@@ -98,14 +154,16 @@ public class WordTree {
         return true;
     }
 
-    //TODO: Add traverse method
-    public void traverse(Node node, Object obj, Method function) {
+    public void traverse(Node node, PipedOutputStream pos) {
         if (!node.value.equals("")) {
             try {
-                function.invoke(obj,node.value);
+                byte[] value = node.value.getBytes("US-ASCII");
+                pos.write(value,0,value.length);
+                pos.write(10);
+                pos.flush();
             }
             catch (Exception ex) {
-                System.out.println(ex);
+                ex.printStackTrace();
             }
         }
 
@@ -113,7 +171,7 @@ public class WordTree {
             node.sort();
         }
         for (Node child : node.children) {
-            traverse(child, obj, function);
+            traverse(child, pos);
         }
     }
 
