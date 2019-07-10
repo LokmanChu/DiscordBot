@@ -130,6 +130,10 @@ public class BlockedWords {
         messageQueue.offer(event);
     }
 
+    public String test() {
+        return "hello";
+    }
+
 
     public static void main(String[] args) throws java.io.IOException {
         BlockedWords b = new BlockedWords();

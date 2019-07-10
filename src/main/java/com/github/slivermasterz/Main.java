@@ -11,9 +11,8 @@ public class Main {
         //Insert bot's token here
         String token = "NTk3NTI0OTYyMDY4MjY3MDYy.XSUhcQ.tLlv7BbO7Qzpl5spl4EfMAkw_gM";
         DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
+        System.out.println(api.createBotInvite());
 
-        MessageListener messageListener = new MessageListener(api);
-
-        BlockedWords blockedWords = new BlockedWords();
+        new EventListener(api);
     }
 }
