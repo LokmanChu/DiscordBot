@@ -20,7 +20,6 @@ public class ReportCommand implements MessageCreateListener, ReactionAddListener
 	
 	@Override
 	public void onMessageCreate(MessageCreateEvent event) {
-		// TODO Auto-generated method stub
 		// Upon receiving '!report' command, send DM for further instructions
         if (event.getMessageContent().equalsIgnoreCase("!report")) {
         	User author = event.getMessageAuthor().asUser().get();
@@ -81,12 +80,12 @@ public class ReportCommand implements MessageCreateListener, ReactionAddListener
 	public void onReactionAdd(ReactionAddEvent event) {
 		// TODO Auto-generated method stub
 		if (event.getChannel() == event.getApi().getChannelsByName("reports").iterator().next()) {
-    		if (event.getEmoji().equalsEmoji("👍")) {
+    		if (event.getEmoji().equalsEmoji("ðŸ‘�")) {
     			//TODO: Strike Offender
     			event.getApi().getTextChannelsByName("reports").iterator().next().sendMessage("Striked Boi!");
     			System.out.println("*****");
     		}
-    		else if (event.getEmoji().equalsEmoji("👎")) {
+    		else if (event.getEmoji().equalsEmoji("ðŸ‘Ž")) {
     			//TODO: Disregard Report
     			event.getApi().getTextChannelsByName("reports").iterator().next().sendMessage("Disregarded Boi!");
     			System.out.println("*****");

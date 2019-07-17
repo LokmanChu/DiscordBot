@@ -1,7 +1,13 @@
 package com.github.aqml15.discordbot;
 
+import java.awt.Color;
+
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
+import org.javacord.api.entity.permission.Permissions;
+import org.javacord.api.entity.permission.PermissionsBuilder;
+import org.javacord.api.entity.permission.Role;
+import org.javacord.api.entity.server.Server;
 
 public class Main {
 
@@ -15,13 +21,15 @@ public class Main {
 
         api.addListener(new ReportCommand());
         api.addListener(new MembersListCommands());
-        //System.out.println(api.getServers().iterator().next().getMembersByName("aqml15"));
+        api.addListener(new Spam());
         
         @SuppressWarnings("unused")
 		Setup su = new Setup(api);
         
         MembersList list = new MembersList();
-        if (list.lastSave()) list.add(api.getOwner().toString());
-        
+        SpamList slist = new SpamList();
+        Member admin = new Member(api.getOwner().getNow(null).getName(), api.getOwnerId());
+        list.add(admin.id, admin);
+        System.out.println(list.print());
     }
 }

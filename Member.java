@@ -1,7 +1,6 @@
 package com.github.aqml15.discordbot;
 
 public class Member {
-	
 	String name;
 	Long id;
 	

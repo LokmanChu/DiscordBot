@@ -18,10 +18,15 @@ public class Setup {
         Permissions modPermissions = new PermissionsBuilder().setAllAllowed().build();
         Permissions noPermissions = new PermissionsBuilder().setAllDenied().build();
         Role mod = null;
+        Role cr = null;
         
         if (server.getRolesByName("Mod").size() == 0) {
         	mod = server.createRoleBuilder().setName("Mod").setPermissions(modPermissions).setColor(Color.CYAN).create().join();
             mod.addUser(server.getOwner(), "Owner is Moderator");
+        }
+        
+        if (server.getRolesByName("Chat Restrict").size() == 0) {
+        	cr = server.createRoleBuilder().setName("Chat Restrict").setPermissions(noPermissions).setColor(Color.RED).create().join();
         }
         
         // Creates Private Report Channel if none exists
@@ -35,5 +40,5 @@ public class Setup {
         	System.out.println("Report Channel successfully created...");
         }
 	}
-	
+
 }
