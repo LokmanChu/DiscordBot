@@ -1,131 +1,99 @@
 package com.github.aqml15.discordbot;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
+
 
 /*
  * MembersList implements a Tree Map to keep track of members and order alphabetically.
  */
-public class MembersList implements Serializable {
-
-	private static final long serialVersionUID = -921260427607624568L;
-	static Map<String, Integer> treeMap;
-	int id;
-	static String reportsPath = "src/data/reportsList.ser";
+public class MembersList {
+	static Map<Long, ArrayList<Member>> map;
+	int size = 0;
+	String print = "";
 	
-	class StringComparator implements Comparator<String>, Serializable {
+	public MembersList() {
+		map = new HashMap<Long, ArrayList<Member>>();
+	}
+	
+	public void add(Member value) {
+		if (map.get(value.id % 113) != null) {
+			map.get(value.id % 113).add(value);
+			size++;
+		}
 		
-		private static final long serialVersionUID = -921260427607624568L;
-	 
-	    public int compare(String x, String y) {
-			return x.toLowerCase().compareTo(y.toLowerCase());
+		else {
+			ArrayList<Member> list = new ArrayList<>();
+			list.add(value);
+			map.put(value.id % 113, list);
+			size++;
 		}
 	}
 	
-	public MembersList() {	
-		id = 0;
-		treeMap = new TreeMap<>(new StringComparator());
+	public void remove(Member value) {
+		if (map.containsKey(value.id % 113)) {
+			if (map.get(value.id % 113).size() > 0) {
+				map.get(value.id % 113).remove(value);
+				size--;
+			}
+			else {
+				//map.remove(value.id % 113, map.get(value.id % 113));
+				map.put(value.id % 113, null);
+			}
+		}
 	}
-	
-	/*
-	 * Returns number of elements
-	 */
+
 	public int size() {
-		return treeMap.size();
+		return size;
 	}
 	
-	/*
-	 * Adds a member
-	 * @param member String
-	 */
-	public void add(String member) {
-		if (!(treeMap.containsKey(member)))
-			treeMap.put(member, id);
-			id++;
-	}	
-	
-	/*
-	 * Removes a member
-	 * @param member String
-	 */
-	public void remove(String member) {
-		if (treeMap.containsKey(member))
-			treeMap.remove(member);
-	}	
-	
-	/*
-	 * Checks if a member exists by name
-	 * @param member String
-	 * @return boolean
-	 */
-	public boolean searchByName(String member) {
-		return treeMap.containsKey(member);
+	public ArrayList<Member> get(Long id) {
+		return map.get(id % 113);
 	}
 	
-	/*
-	 * Checks if a member exists by id
-	 * @param member String
-	 * @return boolean
-	 */
-	public boolean searchById(int id) {
-		return treeMap.containsValue(id);
+	public Boolean contains(Member m) {
+		if (map.get(m.id%113) != null) {
+			if (map.get(m.id%113).isEmpty()) {
+				return false;
+			}
+			else {
+				for (int i = 0; i < map.get(m.id % 113).size(); i++) {
+					if (m == map.get(m.id % 113).get(i)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 	
-	/*
-	 * Prints the Reports List
-	 * @return String
-	 */
-	public String print() {
+	public void clear() {
+		map.clear();
+		size = 0;
+	}
+	
+	public static String print() {
+		Iterator<ArrayList<Member>> it = map.values().iterator();
 		String print = "";
-		for (Entry<String, Integer> entry : treeMap.entrySet()) {
-			System.out.println("ID: " + entry.getValue() + ". Member: " + entry.getKey());
-			print = print + "ID: " + entry.getValue() + ", Member: " + entry.getKey() + "\n";
+		while (it.hasNext()) {
+			ArrayList<Member> memList = (ArrayList<Member>) it.next();
+			for (int i = 0; i < memList.size(); i++) {
+				print = print + "Name: " + memList.get(i).name + " || ID: " + memList.get(i).id + "\n";
+			}
 		}
 		return print;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Boolean lastSave() {
-		Boolean success = true;
-		try {
-        	FileInputStream fileIn = new FileInputStream(reportsPath);
-        	ObjectInputStream in = new ObjectInputStream(fileIn);
-        	treeMap = (Map<String, Integer>) in.readObject();
-        	in.close();
-        	fileIn.close();
-        	System.out.println("Members List found!");
-        } catch (ClassNotFoundException c) {
-        	System.out.println("Members List not found");
-        	success = false;
-        	//c.printStackTrace();
-        } catch (IOException i) {
-        	System.out.println("Members List not found");
-        	success = false;
-        	//i.printStackTrace();
-        }
-        
-        if (!success) {
-        	try {
-        		FileOutputStream fileOut = new FileOutputStream(reportsPath);
-        		ObjectOutputStream out = new ObjectOutputStream(fileOut);
-        		out.writeObject(treeMap);
-        		out.close();
-        		fileOut.close();
-        		System.out.println("Members List was saved into " + reportsPath);
-        	} catch (IOException i) {
-        		System.out.println("Save failed...");
-        		i.printStackTrace();
-        	}
-        }
-        
-        return success;
+	public static void main(String[] args) {
+		MembersList list = new MembersList();
+		Member m1 = new Member("Obama", (long) 123456789);
+		Member m2 = new Member("Kobe", (long) 123456789);
+		Member m3 = new Member("Jackie Chan", (long) 123456789);
+		list.add(m1);
+		list.add(m2);
+		list.add(m3);
+		System.out.println(print());
 	}
 }
