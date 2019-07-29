@@ -52,13 +52,15 @@ public class ReportCommand extends MembersList implements MessageCreateListener,
 			String reportMessage = "";
 			String[] collection = message.split("\\s+");
 			User offenderUser = event.getApi().getCachedUsersByName(offender).iterator().next();
+			System.out.println(offenderUser);
 			guilty = new Member(offenderUser.getName(), offenderUser.getId());
 			guiltyStriked = new StrikedMember(offenderUser.getName(), offenderUser.getId());
-			guiltyStriked.addReason(reportMessage);
-
+			
 			for (int i = 2; i < collection.length; i++) {
 				reportMessage = reportMessage + " " + collection[i];
 			}
+			System.out.println(reportMessage);
+			//guiltyStriked.addReason(reportMessage);
 
 			if (message.startsWith("!!!", 0)) {
 				System.out.println("NAME: " + offender);
@@ -85,8 +87,8 @@ public class ReportCommand extends MembersList implements MessageCreateListener,
 		// if the message is from the report channel, emote
 		if (event.getChannel() == reportChannel) {
 			System.out.println("emote");
-			event.addReactionsToMessage("👍"); // thumbs up
-			event.addReactionsToMessage("👎"); // thumbs down
+			event.addReactionsToMessage("ðŸ‘�"); // thumbs up
+			event.addReactionsToMessage("ðŸ‘Ž"); // thumbs down
 		}
 	}
 
@@ -108,7 +110,7 @@ public class ReportCommand extends MembersList implements MessageCreateListener,
 			System.out.println("else statement");
 			if (event.getChannel() == event.getApi().getChannelsByName("reports").iterator().next()) {
 				// Strike offender if thumbs up
-				if (event.getEmoji().equalsEmoji("👍")) {
+				if (event.getEmoji().equalsEmoji("ðŸ‘�")) {
 					// TODO: Strike Offender
 					if (contains(guilty)) {
 						remove(guilty);
@@ -119,7 +121,7 @@ public class ReportCommand extends MembersList implements MessageCreateListener,
 					System.out.println("Report");
 				}
 				// Ignore report if thumbs down
-				else if (event.getEmoji().equalsEmoji("👎")) {
+				else if (event.getEmoji().equalsEmoji("ðŸ‘Ž")) {
 					// TODO: Disregard Report
 					event.getApi().getTextChannelsByName("reports").iterator().next().sendMessage("Disregarded Boi!");
 					System.out.println("Safe");

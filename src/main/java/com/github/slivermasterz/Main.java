@@ -16,6 +16,7 @@ public class Main {
         api.addListener(new ReportCommand());
         api.addListener(new MembersListCommands());
         api.addListener(new Spam());
+        api.addListener(new SpamCommands());
         
         @SuppressWarnings("unused")
 		Setup su = new Setup(api);

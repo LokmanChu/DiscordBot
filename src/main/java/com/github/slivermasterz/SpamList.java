@@ -9,26 +9,32 @@ public class SpamList {
 		spamList = new HashMap<>();
 	}
 	
-	public void add(SpamMember m) {
+	public void addSpam(SpamMember m) {
 		m.time = System.currentTimeMillis();
 		spamList.put(m.name, m);
 	}
 	
-	public void remove(SpamMember m) {
+	public void removeSpam(SpamMember m) {
 		spamList.remove(m.name);
 	}
 	
-	public SpamMember get(String name) {
+	public SpamMember getSpam(String name) {
 		return spamList.get(name);
 	}
 	
-	public Long getTime(SpamMember m) {
-		return m.time;
-	}
 	
 	public Boolean exist(String m) {
 		if (spamList.get(m) != null)
 			return true;
 		return false;
+	}
+	
+	public int size() {
+		return spamList.size();
+	}
+	
+	public void print() {
+		System.out.println(spamList.toString());
+		System.out.println(spamList.size());
 	}
 }
