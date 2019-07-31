@@ -4,7 +4,9 @@ import java.io.PipedOutputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 /**
  * WordTree uses a Trie structure in order to get an O(n) contains method.
@@ -66,12 +68,12 @@ public class WordTree {
             int index = convertToIndex(msg.charAt(i));
             if (node.contains(index)) {
                 node = node.getChild(index);
-                if (!node.value.equals("") && msg.charAt(i+1) == ' ') {
+                if (!node.value.equals("") && (msg.length() == i+1 || msg.charAt(i+1) == ' ')) {
                     list.add(node.value);
                 }
             }
             else {
-                while (msg.charAt(i)!= ' ' || msg.charAt(i)!='\n') i++;
+                while (msg.length() < i && (msg.charAt(i)!= ' ' || msg.charAt(i)!='\n')) i++;
                 i++;
                 node = root;
             }
@@ -82,11 +84,15 @@ public class WordTree {
         return list;
     }
 
+    public boolean insert(String value) {
+        return insert(value,0,"");
+    }
+
     /**
      * Insert String into tree
      * @param value String to be inserted
      */
-    public boolean insert(String value) {
+    public boolean insert(String value,int n, String replaceString) {
         if (writeLock) {
             return false;
         }
@@ -101,11 +107,17 @@ public class WordTree {
             node.numWords += 1;
         }
         node.value = value;
+        node.setBooleans(n);
+        node.replaceString = replaceString;
         root.numWords += 1;
         return true;
     }
 
     public boolean insertSorted(String value) {
+        return insertSorted(value,0,"");
+    }
+
+    public boolean insertSorted(String value,int n, String replaceString) {
         if (writeLock) {
             return false;
         }
@@ -120,6 +132,8 @@ public class WordTree {
             node.numWords += 1;
         }
         node.value = value;
+        node.setBooleans(n);
+        node.replaceString = replaceString;
         root.numWords += 1;
         return true;
     }
@@ -154,17 +168,30 @@ public class WordTree {
         return true;
     }
 
+    private void traverseHelper(Node node, PipedOutputStream pos){
+        try {
+            byte[] value = node.value.getBytes("US-ASCII");
+            pos.write('[');
+            pos.write('"');
+            pos.write(value,0,value.length);
+            byte[] mid = {'"',']','0','0','|'};
+            int n = node.getBooleans();
+            mid[2] = (byte)((n/10) + 48);
+            mid[3] = (byte)((n%10) + 48);
+            pos.write(mid,0,mid.length);
+            value = node.replaceString.getBytes("US-ASCII");
+            pos.write(value,0,value.length);
+            pos.write(10);
+            pos.flush();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public void traverse(Node node, PipedOutputStream pos) {
         if (!node.value.equals("")) {
-            try {
-                byte[] value = node.value.getBytes("US-ASCII");
-                pos.write(value,0,value.length);
-                pos.write(10);
-                pos.flush();
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            traverseHelper(node,pos);
         }
 
         if (!node.sorted) {
@@ -172,6 +199,19 @@ public class WordTree {
         }
         for (Node child : node.children) {
             traverse(child, pos);
+        }
+    }
+
+    public void traverse(Node node, Consumer<String> c) {
+        if (!node.value.equals("")) {
+            c.accept(node.value);
+        }
+
+        if (!node.sorted) {
+            node.sort();
+        }
+        for (Node child : node.children) {
+            traverse(child,c);
         }
     }
 
@@ -192,6 +232,12 @@ class Node {
     java.util.ArrayList<Node> children;
     byte childIndex[];
     String value;
+    String replaceString;
+    boolean replace;
+    boolean strike;
+    boolean channel;
+    boolean delete;
+
     byte index;
     int numWords; //number of words traversing this node
     boolean sorted;
@@ -203,6 +249,22 @@ class Node {
         java.util.Arrays.fill(childIndex,(byte)-1);
         numWords = 0;
         sorted = false;
+        replaceString = "";
+        replace = false;
+        strike = false;
+        channel = false;
+        delete = false;
+    }
+
+    public Node(String value, int n, String replaceString) {
+        this.value = value;
+        children = new java.util.ArrayList<Node>(2);
+        childIndex = new byte[(96-32) + 4]; //includes SPACE to ` on ASCII plus {|}~
+        java.util.Arrays.fill(childIndex,(byte)-1);
+        numWords = 0;
+        sorted = false;
+        this.replaceString = replaceString;
+        setBooleans(n);
     }
 
     public void add(int index) {
@@ -282,6 +344,36 @@ class Node {
         for (int i = n; i < children.size(); i++) {
             childIndex[children.get(i).index] = (byte) i;
         }
+    }
+
+    public void setBooleans(int n) {
+        if (n<0 || n>16) {
+            return;
+        }
+        else {
+            int temp = n;
+            delete = temp%2 == 1;
+            temp/=2;
+            channel = temp%2 == 1;
+            temp/=2;
+            strike = temp%2 == 1;
+            temp/=2;
+            replace = temp%2 == 1;
+        }
+    }
+
+    public int getBooleans() {
+        int result = 0;
+        int base = 1;
+        result += delete? base:0;
+        base*=2;
+        result += channel? base:0;
+        base*=2;
+        result += strike? base:0;
+        base*=2;
+        result += replace? base:0;
+
+        return result;
     }
 
 }

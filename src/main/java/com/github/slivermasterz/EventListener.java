@@ -20,8 +20,9 @@ public class EventListener {
         api.addMessageCreateListener(event -> {
             String msg = event.getMessage().getContent();
             User author = event.getMessageAuthor().asUser().get();
-            //! CMD key
-            System.out.println(msg.substring(0, 1).equals("!"));
+            if (author.isBot()) return;
+            //! CMD k
+            System.out.println(msg);
             if (msg.substring(0, 1).equals("!")) {
                 String args[] = msg.substring(1, msg.length()).split(" ");
                 String cmd = args[0];
@@ -29,7 +30,7 @@ public class EventListener {
 
                 switch (cmd) {
                     case "list":
-                        //TODO: list method
+                         blockedWords.listWords(event.getChannel());
                         break;
                     case "add":
                         blockedWords.tree.insert(args[0]);
@@ -45,9 +46,11 @@ public class EventListener {
                         break;
                 }
             }
-
-            if (event.isPrivateMessage() && reportCommand.pendingReporters.contains(author)) {
+            else if (event.isPrivateMessage() && reportCommand.pendingReporters.contains(author)) {
                 reportCommand.addPMReport(author,msg);
+            }
+            else {
+                blockedWords.checkMessage(event);
             }
         });
     }

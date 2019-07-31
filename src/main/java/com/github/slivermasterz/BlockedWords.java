@@ -1,11 +1,15 @@
 package com.github.slivermasterz;
 
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.event.Event;
+import org.javacord.api.event.channel.ChannelEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Scanner;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.*;
 
 public class BlockedWords {
     Scanner in;
@@ -14,13 +18,12 @@ public class BlockedWords {
     PipedOutputStream pos;
     File file;
 
-    ArrayBlockingQueue<MessageCreateEvent> messageQueue = new ArrayBlockingQueue<MessageCreateEvent>(100);
-
     WordTree tree;
 
     public BlockedWords() {
         tree = new WordTree();
         file = new File("BannedWords.txt");
+        readWords();
     }
 
     public void writeWords() {
@@ -100,13 +103,27 @@ public class BlockedWords {
             try {
                 int val = -1;
                 String temp = "";
+                String value = "";
+                int n = -1;
+                boolean first = false;
                 while ((val = pis.read()) != -1) {
                     if (val == 10) {
-                        tree.insert(temp);
+                        tree.insert(value,n,temp);
+                        temp = "";
+                        value = "";
+                        n = -1;
+                    }
+                    else if ((char)val == ']' && first) {
+                        value = temp.substring(2,temp.length()-1);
+                        temp = "";
+                    }
+                    else if (!value.equals("") && n == -1 && (char)val == '|') {
+                        n = Integer.parseInt(temp);
                         temp = "";
                     }
                     else {
                         temp += (char) val;
+                        first = (char)val == '"';
                     }
                 }
                 pis.close();
@@ -126,41 +143,48 @@ public class BlockedWords {
         }
     }
 
-    public void addEvent(MessageCreateEvent event) {
-        messageQueue.offer(event);
+    public void listWords(TextChannel channel){
+        Runnable runnable = () -> {
+            ArrayList<String> list = new ArrayList<String>();
+            StringBuffer sb = new StringBuffer(2000);
+            String temp = "";
+            int tempLen = 0;
+            tree.traverse(tree.root,(string)->{
+                if (sb.length()+string.length()+1 > 2000){
+                    channel.sendMessage(sb.toString());
+                    sb.delete(0,sb.length());
+                }
+                sb.append(string + "\n");
+            });
+            channel.sendMessage(sb.toString());
+        };
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        es.submit(runnable);
+        es.shutdown();
     }
 
-    public String test() {
-        return "hello";
+    public void addWords(String word, TextChannel channel) {
+        tree.insertSorted(word);
+        channel.sendMessage("\"" + word + "\"" + " has been added successfully");
+    }
+
+    public void checkMessage(MessageCreateEvent event) {
+        String msg = event.getMessageContent();
+        ArrayList<String> list = tree.messageContains(msg);
+        if (!list.isEmpty()) {
+            event.getMessage().delete("Bad Language");
+        }
     }
 
 
     public static void main(String[] args) throws java.io.IOException {
         BlockedWords b = new BlockedWords();
-        b.readWords();
-        PipedOutputStream pos = new PipedOutputStream();
-        PipedInputStream pis = new PipedInputStream();
-        pis.connect(pos);
+        //b.tree.insert("fuck",8,"****");
+        //b.tree.insert("bitch", 8,"");
+        b.writeWords();
         System.out.println(b.tree.size());
-        try {
-            b.tree.traverse(b.tree.root,pos);
-            pos.close();
-        }
-        catch (Exception ex) {
+        b.tree.traverse(b.tree.root,System.out::println);
 
-        }
-        int val = -1;
-        String temp = "";
-        while ((val = pis.read())!=-1) {
-            if (val == 10) {
-                System.out.println(temp);
-                temp = "";
-            }
-            else {
-                temp += (char) val;
-            }
-        }
-        pis.close();
     }
 
 }

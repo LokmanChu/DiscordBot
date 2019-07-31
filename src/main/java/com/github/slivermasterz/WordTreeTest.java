@@ -138,4 +138,19 @@ public class WordTreeTest {
         assertEquals(expectedList,resultList);
     }
 
+    @Test
+    public void booleansTest() {
+
+        Node n = new Node("");
+        assertFalse(n.replace);
+        assertFalse(n.strike);
+        assertFalse(n.channel);
+        assertFalse(n.delete);
+        assertEquals(0,n.getBooleans());
+        n.setBooleans(5);
+        assertTrue(n.strike);
+        assertTrue(n.delete);
+        assertEquals(5,n.getBooleans());
+    }
+
 }
