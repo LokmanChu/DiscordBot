@@ -3,6 +3,8 @@ package com.github.aqml15;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
+
 import org.junit.jupiter.api.Test;
 
 import com.github.aqml15.discordbot.Member;
@@ -11,7 +13,7 @@ import com.github.aqml15.discordbot.MembersList;
 public class MembersListTest {
 
 	@Test
-	public void sizeTest() {
+	public void sizeTest() throws IOException {
 		MembersList list = new MembersList();
 		Member m1 = new Member("Obama", (long) 123456789);
 		Member m2 = new Member("Kobe", (long) 123456789);
@@ -24,7 +26,7 @@ public class MembersListTest {
 	}
 	
 	@Test
-	public void addTest() {
+	public void addTest() throws IOException {
 		MembersList list = new MembersList();
 		Member m1 = new Member("Obama", (long) 123456789);
 		Member m2 = new Member("Kobe", (long) 123456789);
@@ -32,29 +34,29 @@ public class MembersListTest {
 		list.add(m1);
 		list.add(m2);
 		list.add(m3);
-		assertEquals(true, list.contains(m1));
-		assertEquals(true, list.contains(m2));
-		assertEquals(true, list.contains(m3));
+		assertEquals(true, list.contains(m1.getId()));
+		assertEquals(true, list.contains(m2.getId()));
+		assertEquals(true, list.contains(m3.getId()));
 	}
 	
 	@Test
-	public void removeTest() {
+	public void removeTest() throws IOException {
 		MembersList list = new MembersList();
 		Member m1 = new Member("Obama", (long) 123456789);
-		Member m2 = new Member("Kobe", (long) 123456789);
-		Member m3 = new Member("Jackie Chan", (long) 123456789);
+		Member m2 = new Member("Kobe", (long) 123456788);
+		Member m3 = new Member("Jackie Chan", (long) 123456787);
 		list.add(m1);
 		list.add(m2);
 		list.add(m3);
 		list.remove(m1);
 		list.remove(m2);
-		assertEquals(false, list.contains(m1));
-		assertEquals(false, list.contains(m2));
-		assertEquals(true, list.contains(m3));
+		assertEquals(false, list.contains(m1.getId()));
+		assertEquals(false, list.contains(m2.getId()));
+		assertEquals(true, list.contains(m3.getId()));
 	}
 	
 	@Test
-	public void clearTest() {
+	public void clearTest() throws IOException {
 		MembersList list = new MembersList();
 		Member m1 = new Member("Obama", (long) 123456789);
 		Member m2 = new Member("Kobe", (long) 123456789);
@@ -63,9 +65,22 @@ public class MembersListTest {
 		list.add(m2);
 		list.add(m3);
 		list.clear();
-		assertEquals(false, list.contains(m1));
-		assertEquals(false, list.contains(m2));
-		assertEquals(false, list.contains(m3));
+		assertEquals(false, list.contains(m1.getId()));
+		assertEquals(false, list.contains(m2.getId()));
+		assertEquals(false, list.contains(m3.getId()));
 		assertEquals(0, list.size());
+	}
+	
+	@Test
+	public void getMemberTest() throws IOException {
+		MembersList list = new MembersList();
+		Member m1 = new Member("Obama", (long) 123456789);
+		Member m2 = new Member("Kobe", (long) 987654321);
+		Member m3 = new Member("Jackie Chan", (long) 555555555);
+		list.add(m1);
+		list.add(m2);
+		list.add(m3);
+		assertEquals(m3, list.getMember((long) 555555555));
+		//assertEquals(null, list.getMember((long) 123456777));
 	}
 }

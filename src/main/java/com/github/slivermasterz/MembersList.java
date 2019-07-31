@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-
 /*
  * MembersList implements a Tree Map to keep track of members and order alphabetically.
  */
@@ -14,66 +13,100 @@ public class MembersList {
 	int size = 0;
 	String print = "";
 	
+	/**
+	 * Init
+	 */
 	public MembersList() {
 		map = new HashMap<Long, ArrayList<Member>>();
 	}
 	
+	/**
+	 * Adds Member
+	 * @param value Member
+	 */
 	public void add(Member value) {
 		if (map.get(value.id % 113) != null) {
+			for (Member i:map.get(value.id % 113)) {
+				if (i == value) {
+					return;
+				}
+			}
 			map.get(value.id % 113).add(value);
 			size++;
 		}
 		
 		else {
-			ArrayList<Member> list = new ArrayList<>();
+			ArrayList<Member> list = new ArrayList<Member>();
 			list.add(value);
 			map.put(value.id % 113, list);
 			size++;
 		}
 	}
 	
+	/**
+	 * Removes member
+	 * @param value Member
+	 */
 	public void remove(Member value) {
 		if (map.containsKey(value.id % 113)) {
 			if (map.get(value.id % 113).size() > 0) {
 				map.get(value.id % 113).remove(value);
 				size--;
 			}
-			else {
-				//map.remove(value.id % 113, map.get(value.id % 113));
-				map.put(value.id % 113, null);
-			}
 		}
 	}
-
+	
+	/**
+	 * Returns size of list
+	 * @return int size
+	 */
 	public int size() {
 		return size;
 	}
 	
-	public ArrayList<Member> get(Long id) {
-		return map.get(id % 113);
+	/**
+	 * Gets member
+	 * @param id
+	 * @return Member
+	 */
+	public Member getMember(Long id) {	
+		if (contains(id)) {
+			ArrayList<Member> members = map.get(id % 113);
+			for (Member i: members) {
+				if (i.id.longValue() == id) {
+					return i;
+				}
+			}
+		}
+		return null;
 	}
 	
-	public Boolean contains(Member m) {
-		if (map.get(m.id%113) != null) {
-			if (map.get(m.id%113).isEmpty()) {
-				return false;
-			}
-			else {
-				for (int i = 0; i < map.get(m.id % 113).size(); i++) {
-					if (m == map.get(m.id % 113).get(i)) {
-						return true;
-					}
-				}
+	/**
+	 * Checks if ID is in list
+	 * @param id
+	 * @return Boolean
+	 */
+	public Boolean contains(Long id) {
+		if (map.containsKey(id % 113)) {
+			if (map.get(id % 113).size() > 0) {
+				return true;
 			}
 		}
 		return false;
 	}
 	
+	/**
+	 * Clear list
+	 */
 	public void clear() {
 		map.clear();
 		size = 0;
 	}
 	
+	/**
+	 * Prints list
+	 * @return String
+	 */
 	public static String print() {
 		Iterator<ArrayList<Member>> it = map.values().iterator();
 		String print = "";
@@ -86,14 +119,20 @@ public class MembersList {
 		return print;
 	}
 	
-	public static void main(String[] args) {
-		MembersList list = new MembersList();
-		Member m1 = new Member("Obama", (long) 123456789);
-		Member m2 = new Member("Kobe", (long) 123456789);
-		Member m3 = new Member("Jackie Chan", (long) 123456789);
-		list.add(m1);
-		list.add(m2);
-		list.add(m3);
-		System.out.println(print());
+	/**
+	 * Prints member's statistics
+	 * @return String
+	 */
+	public static String printStats() {
+		Iterator<ArrayList<Member>> it = map.values().iterator();
+		String print = "";
+		while (it.hasNext()) {
+			ArrayList<Member> memList = (ArrayList<Member>) it.next();
+			for (int i = 0; i < memList.size(); i++) {
+				print = print + "Name: " + memList.get(i).name + " || ID: " + memList.get(i).id + " || # Messages: " + memList.get(i).count + "\n";
+			}
+		}
+		return print;
 	}
+
 }

@@ -15,9 +15,20 @@ import org.javacord.api.listener.server.member.ServerMemberLeaveListener;
 
 public class MembersListCommands extends MembersList implements MessageCreateListener, ServerMemberJoinListener, ServerMemberLeaveListener {
 	
-	@Override
 	public void onMessageCreate(MessageCreateEvent event) {
-		// Upon receiving '!viewMembers' command, sends list of members
+
+		Member mem = getMember(event.getMessageAuthor().getId());
+		if (event.getMessageAuthor().isBotUser())
+			return;
+		if (contains(mem.id)) {
+			getMember(event.getMessageAuthor().getId()).increase();
+			System.out.println("count up");
+		}
+		
+		/**
+		 * !viewMembers command
+		 * !viewStats command
+		 */
         if (event.getMessageContent().equalsIgnoreCase("!viewMembers")) {
         	event.getChannel().sendMessage("Members List Requested...");
 
@@ -29,15 +40,24 @@ public class MembersListCommands extends MembersList implements MessageCreateLis
 					.setColor(Color.BLUE))
 			.send((TextChannel) event.getChannel());
         }	
+        
+        if (event.getMessageContent().equalsIgnoreCase("!viewStats")) {
+        	event.getChannel().sendMessage("Stats Requested...");
+        	event.getChannel().sendMessage(printStats());
+        }
 	}
 
-	@Override
+	/**
+	 * Adds member to list on join
+	 */
 	public void onServerMemberJoin(ServerMemberJoinEvent event) {
 		Member member = new Member(event.getUser().getName(), event.getUser().getId());
 		add(member);
 	}
 
-	@Override
+	/**
+	 * Removes member from list on leave
+	 */
 	public void onServerMemberLeave(ServerMemberLeaveEvent event) {
 		Member member = new Member(event.getUser().getName(), event.getUser().getId());
 		remove(member);		

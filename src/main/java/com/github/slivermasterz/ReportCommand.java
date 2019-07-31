@@ -20,7 +20,9 @@ public class ReportCommand extends MembersList implements MessageCreateListener,
 	Member guilty;
 	StrikedMember guiltyStriked;
 
-	@Override
+	/**
+	 * !report command
+	 */
 	public void onMessageCreate(MessageCreateEvent event) {
 		Channel reportChannel = event.getApi().getChannelsByName("reports").iterator().next();
 
@@ -85,14 +87,17 @@ public class ReportCommand extends MembersList implements MessageCreateListener,
 		}
 
 		// if the message is from the report channel, emote
-		if (event.getChannel() == reportChannel) {
+		if (event.getChannel() == reportChannel && event.getMessageContent().equals("**__Report!__**")) {
 			System.out.println("emote");
-			event.addReactionsToMessage("ðŸ‘�"); // thumbs up
-			event.addReactionsToMessage("ðŸ‘Ž"); // thumbs down
+			event.addReactionsToMessage("👍" ); // thumbs up
+			event.addReactionsToMessage("👎"); // thumbs down
+			System.out.println(event.getMessageContent());
 		}
 	}
 
-	@Override
+	/**
+	 * Add reaction of report pm
+	 */
 	public void onReactionAdd(ReactionAddEvent event) {
 		Boolean f = false;
 		
@@ -110,21 +115,23 @@ public class ReportCommand extends MembersList implements MessageCreateListener,
 			System.out.println("else statement");
 			if (event.getChannel() == event.getApi().getChannelsByName("reports").iterator().next()) {
 				// Strike offender if thumbs up
-				if (event.getEmoji().equalsEmoji("ðŸ‘�")) {
+				if (event.getEmoji().equalsEmoji("👍")) {
 					// TODO: Strike Offender
-					if (contains(guilty)) {
+					if (contains(guilty.id)) {
 						remove(guilty);
 						add(guiltyStriked);
 					}
 					add(guilty);
 					event.getApi().getTextChannelsByName("reports").iterator().next().sendMessage("Striked Boi!");
 					System.out.println("Report");
+					event.removeAllReactionsFromMessage();
 				}
 				// Ignore report if thumbs down
-				else if (event.getEmoji().equalsEmoji("ðŸ‘Ž")) {
+				else if (event.getEmoji().equalsEmoji("👎")) {
 					// TODO: Disregard Report
 					event.getApi().getTextChannelsByName("reports").iterator().next().sendMessage("Disregarded Boi!");
 					System.out.println("Safe");
+					event.removeAllReactionsFromMessage();
 				}
 			}
 		}

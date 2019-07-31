@@ -6,7 +6,6 @@ import org.javacord.api.listener.message.MessageCreateListener;
 
 public class SpamCommands extends SpamList implements MessageCreateListener {
 
-	@Override
 	public void onMessageCreate(MessageCreateEvent event) {
 		User culprit = event.getMessageAuthor().asUser().get();
 		System.out.println(culprit);
