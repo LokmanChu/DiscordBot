@@ -9,5 +9,9 @@ public class SpamMember extends Member {
 		strikes = 0;
 		time = 0;
 	}
+	
+	public void setStrike(int i) {
+		strikes = i;
+	}
 
 }

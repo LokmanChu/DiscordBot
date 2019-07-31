@@ -13,9 +13,8 @@ public class SpamCommands extends SpamList implements MessageCreateListener {
 		System.out.println(exist(culprit.getName()));
 		
 		if (exist(culprit.getName())) {
-			if (getSpam(culprit.getName()).strikes < 0) {
+			if (getSpam(culprit.getName()).strikes == 5) {
 				event.deleteMessage();
-				getSpam(culprit.getName()).strikes++;
 				System.out.println("deleted");
 			}
 		}

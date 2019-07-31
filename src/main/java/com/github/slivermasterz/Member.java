@@ -2,7 +2,7 @@ package com.github.aqml15.discordbot;
 
 public class Member {
 	String name;
-	Long id;
+	long id;
 	int count = 0;
 	
 	/**

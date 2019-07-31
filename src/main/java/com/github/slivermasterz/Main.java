@@ -22,12 +22,10 @@ public class Main {
         api.addListener(new SpamCommands());
         
         // Setup
+        MembersList mList = new MembersList();
         @SuppressWarnings("unused")
 		Setup su = new Setup(api);
-        MembersList list = new MembersList();
         @SuppressWarnings("unused")
 		SpamList slist = new SpamList();
-        Member admin = new Member(api.getOwner().getNow(null).getName(), api.getOwnerId());
-        list.add(admin);
     }
 }

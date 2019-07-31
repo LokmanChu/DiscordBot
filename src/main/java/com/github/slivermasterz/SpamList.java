@@ -17,7 +17,6 @@ public class SpamList {
 	 * @param m
 	 */
 	public void addSpam(SpamMember m) {
-		m.time = System.currentTimeMillis();
 		spamList.put(m.name, m);
 	}
 	
@@ -35,7 +34,10 @@ public class SpamList {
 	 * @return SpamMember
 	 */
 	public SpamMember getSpam(String name) {
-		return spamList.get(name);
+		if (exist(name)) {
+			spamList.get(name);
+		}
+		return null;
 	}
 	
 	/**

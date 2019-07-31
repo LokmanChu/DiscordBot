@@ -69,13 +69,11 @@ public class MembersList {
 	 * @param id
 	 * @return Member
 	 */
-	public Member getMember(Long id) {	
-		if (contains(id)) {
-			ArrayList<Member> members = map.get(id % 113);
-			for (Member i: members) {
-				if (i.id.longValue() == id) {
-					return i;
-				}
+	public Member getMember(long id) {	
+		ArrayList<Member> members = map.get(id % 113);
+		for (Member i: members) {
+			if (i.id == id) {
+				return i;
 			}
 		}
 		return null;
@@ -86,7 +84,7 @@ public class MembersList {
 	 * @param id
 	 * @return Boolean
 	 */
-	public Boolean contains(Long id) {
+	public Boolean contains(long id) {
 		if (map.containsKey(id % 113)) {
 			if (map.get(id % 113).size() > 0) {
 				return true;

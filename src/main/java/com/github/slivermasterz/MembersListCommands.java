@@ -17,13 +17,9 @@ public class MembersListCommands extends MembersList implements MessageCreateLis
 	
 	public void onMessageCreate(MessageCreateEvent event) {
 
-		Member mem = getMember(event.getMessageAuthor().getId());
 		if (event.getMessageAuthor().isBotUser())
 			return;
-		if (contains(mem.id)) {
-			getMember(event.getMessageAuthor().getId()).increase();
-			System.out.println("count up");
-		}
+		getMember(event.getMessageAuthor().getId()).increase();
 		
 		/**
 		 * !viewMembers command
