@@ -1,28 +1,16 @@
 package com.github.aqml15.discordbot;
 
-import java.util.ArrayList;
-
 public class StrikedMember extends Member {
-	ArrayList<String> array;
+	String reason;
 	
-	public StrikedMember(String name, Long id) {
+	public StrikedMember(String name, Long id, String reason) {
 		super(name, id);
-	}
-	
-	public void addReason(String reason) {
-		array.add(reason);
+		this.reason = reason;
 	}
 	
 	@Override
 	public Boolean isStriked() {
 		return true;
 	}
-	
-	public int numStrikes() {
-		return array.size();
-	}
-	
-	public ArrayList<String> getReasons() {
-		return array;
-	}
+
 }

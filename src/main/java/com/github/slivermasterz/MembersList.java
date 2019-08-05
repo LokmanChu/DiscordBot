@@ -1,23 +1,64 @@
 package com.github.aqml15.discordbot;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 /*
  * MembersList implements a Tree Map to keep track of members and order alphabetically.
  */
 public class MembersList {
-	static Map<Long, ArrayList<Member>> map;
+	Map<Long, ArrayList<Member>> map;
 	int size = 0;
 	String print = "";
+	String file = "/Users/Albert/eclipse-workspace/discordbot/data/data.properties";
+	Properties properties;
 	
 	/**
 	 * Init
 	 */
 	public MembersList() {
 		map = new HashMap<Long, ArrayList<Member>>();
+		properties = new Properties();
+		read();
+	}
+	
+	public void write() {		
+		for (Map.Entry<Long, ArrayList<Member>> entry : map.entrySet()){
+            properties.put(entry.getKey().toString(), entry.getValue().toString());
+        }
+
+		try {
+			properties.store(new FileOutputStream(file), null);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void read() {
+		try {
+			properties.load(new FileInputStream(file));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		map = (Map)properties;
+		
 	}
 	
 	/**
@@ -100,12 +141,13 @@ public class MembersList {
 		map.clear();
 		size = 0;
 	}
+
 	
 	/**
 	 * Prints list
 	 * @return String
 	 */
-	public static String print() {
+	public String print() {
 		Iterator<ArrayList<Member>> it = map.values().iterator();
 		String print = "";
 		while (it.hasNext()) {
@@ -121,16 +163,35 @@ public class MembersList {
 	 * Prints member's statistics
 	 * @return String
 	 */
-	public static String printStats() {
+	public String printStats() {
 		Iterator<ArrayList<Member>> it = map.values().iterator();
 		String print = "";
 		while (it.hasNext()) {
 			ArrayList<Member> memList = (ArrayList<Member>) it.next();
 			for (int i = 0; i < memList.size(); i++) {
-				print = print + "Name: " + memList.get(i).name + " || ID: " + memList.get(i).id + " || # Messages: " + memList.get(i).count + "\n";
+				print = print + "Name: " + memList.get(i).name + ", ID: " + memList.get(i).id + ", # Messages: " + memList.get(i).count + "\n";
 			}
 		}
 		return print;
+	}
+	
+	public static void main(String a[]) {
+		MembersList list = new MembersList();
+		
+		Member bob = new Member("bob", (long) 123456789);
+		Member jon = new Member("jon", (long) 123456777);
+		
+		list.add(bob);
+		list.add(jon);
+		
+		System.out.println("list: " + "\n" + list.print());
+		
+		list.write();
+		MembersList list2 = new MembersList();
+		list2.read();
+		
+		System.out.println("list2: " + "\n" + list.print());
+		
 	}
 
 }

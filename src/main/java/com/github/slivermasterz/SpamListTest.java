@@ -17,9 +17,9 @@ public class SpamListTest {
 		SpamMember fred = new SpamMember("fred", (long) 123456789);
 		SpamMember jon = new SpamMember("jon", (long) 123456789);
 		
-		list.addSpam(bob);
-		list.addSpam(fred);
-		list.addSpam(jon);
+		list.add(bob);
+		list.add(fred);
+		list.add(jon);
 		
 		assertEquals(3, list.size());
 	}
@@ -32,12 +32,12 @@ public class SpamListTest {
 		SpamMember fred = new SpamMember("fred", (long) 123456789);
 		SpamMember jon = new SpamMember("jon", (long) 123456789);
 		
-		list.addSpam(bob);
-		list.addSpam(fred);
-		list.addSpam(jon);
+		list.add(bob);
+		list.add(fred);
+		list.add(jon);
 		
-		list.removeSpam(jon);
-		list.removeSpam(fred);
+		list.remove(jon);
+		list.remove(fred);
 		
 		assertEquals(1, list.size());
 	}
@@ -50,11 +50,11 @@ public class SpamListTest {
 		SpamMember fred = new SpamMember("fred", (long) 123456789);
 		SpamMember jon = new SpamMember("jon", (long) 123456789);
 		
-		list.addSpam(bob);
-		list.addSpam(fred);
-		list.addSpam(jon);
+		list.add(bob);
+		list.add(fred);
+		list.add(jon);
 		
-		assertEquals(bob, list.getSpam("bob"));
+		assertEquals(bob, list.get("bob"));
 	}
 	
 	@Test
@@ -65,9 +65,9 @@ public class SpamListTest {
 		SpamMember fred = new SpamMember("fred", (long) 123456789);
 		SpamMember jon = new SpamMember("jon", (long) 123456789);
 		
-		list.addSpam(bob);
-		list.addSpam(fred);
-		list.addSpam(jon);
+		list.add(bob);
+		list.add(fred);
+		list.add(jon);
 		
 		assertEquals(true, list.exist("bob"));
 	}

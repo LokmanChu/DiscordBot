@@ -1,62 +1,68 @@
 package com.github.aqml15.discordbot;
 
-import java.awt.Color;
+import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.channel.Channel;
+import org.javacord.api.entity.user.User;
 
-import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.message.MessageBuilder;
-import org.javacord.api.entity.message.MessageDecoration;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.event.message.MessageCreateEvent;
-import org.javacord.api.event.server.member.ServerMemberJoinEvent;
-import org.javacord.api.event.server.member.ServerMemberLeaveEvent;
-import org.javacord.api.listener.message.MessageCreateListener;
-import org.javacord.api.listener.server.member.ServerMemberJoinListener;
-import org.javacord.api.listener.server.member.ServerMemberLeaveListener;
-
-public class MembersListCommands extends MembersList implements MessageCreateListener, ServerMemberJoinListener, ServerMemberLeaveListener {
+public class MembersListCommands {
 	
-	public void onMessageCreate(MessageCreateEvent event) {
-
-		if (event.getMessageAuthor().isBotUser())
-			return;
-		getMember(event.getMessageAuthor().getId()).increase();
-		
-		/**
-		 * !viewMembers command
-		 * !viewStats command
-		 */
-        if (event.getMessageContent().equalsIgnoreCase("!viewMembers")) {
-        	event.getChannel().sendMessage("Members List Requested...");
-
-        	new MessageBuilder()
-			.append("Report!", MessageDecoration.BOLD,
-					MessageDecoration.UNDERLINE)
-			.setEmbed(new EmbedBuilder().setTitle("Members List")
-					.setDescription(print())
-					.setColor(Color.BLUE))
-			.send((TextChannel) event.getChannel());
-        }	
-        
-        if (event.getMessageContent().equalsIgnoreCase("!viewStats")) {
-        	event.getChannel().sendMessage("Stats Requested...");
-        	event.getChannel().sendMessage(printStats());
-        }
+	DiscordApi api;
+	MembersList list;
+	
+	/**
+	 * Init
+	 * @param api
+	 */
+	public MembersListCommands(DiscordApi api) {
+		this.api = api;
+		list = new MembersList();
+	}
+	
+	public void add(User user) {
+		list.add(new Member(user.getName(), user.getId()));
+	}
+	
+	public void ban(User user, String reason) {
+		StrikedMember offender = new StrikedMember(user.getName(), user.getId(), reason);
+		if (list.contains(user.getId())) {
+			list.remove(list.getMember(user.getId()));
+		}
+		list.add(offender);
 	}
 
 	/**
+	 * Prints list of members
+	 * @param list
+	 */
+	public void viewMembers(Channel channel) {
+		channel.asTextChannel().get().sendMessage(list.print());
+		channel.asTextChannel().get().sendMessage("no");
+	}
+	
+	/**
+	 * Prints statistics of members
+	 * @param list
+	 */
+	public void viewStats(Channel channel) {
+		channel.asTextChannel().get().sendMessage(list.printStats());
+	}
+	
+	/**
 	 * Adds member to list on join
 	 */
-	public void onServerMemberJoin(ServerMemberJoinEvent event) {
-		Member member = new Member(event.getUser().getName(), event.getUser().getId());
-		add(member);
+	public void memberJoin(User user) {
+		Member member = new Member(user.getName(), user.getId());
+		list.add(member);
+		list.write();
 	}
 
 	/**
 	 * Removes member from list on leave
 	 */
-	public void onServerMemberLeave(ServerMemberLeaveEvent event) {
-		Member member = new Member(event.getUser().getName(), event.getUser().getId());
-		remove(member);		
+	public void memberLeave(User user) {
+		Member member = new Member(user.getName(), user.getId());
+		list.remove(member);		
+		list.write();
 	}
 	
 }

@@ -3,6 +3,7 @@ package com.github.aqml15.discordbot;
 import java.util.HashMap;
 
 public class SpamList {
+	
 	HashMap<String, SpamMember> spamList;
 	
 	/**
@@ -16,7 +17,7 @@ public class SpamList {
 	 * Adds member to spam list
 	 * @param m
 	 */
-	public void addSpam(SpamMember m) {
+	public void add(SpamMember m) {
 		spamList.put(m.name, m);
 	}
 	
@@ -24,7 +25,7 @@ public class SpamList {
 	 * Remove member from spam list
 	 * @param m
 	 */
-	public void removeSpam(SpamMember m) {
+	public void remove(SpamMember m) {
 		spamList.remove(m.name);
 	}
 	
@@ -33,11 +34,8 @@ public class SpamList {
 	 * @param name
 	 * @return SpamMember
 	 */
-	public SpamMember getSpam(String name) {
-		if (exist(name)) {
-			spamList.get(name);
-		}
-		return null;
+	public SpamMember get(String name) {
+		return spamList.get(name);
 	}
 	
 	/**
