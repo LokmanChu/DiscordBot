@@ -1,11 +1,19 @@
 package com.github.slivermasterz;
 
+import java.util.ArrayList;
+
 public class StrikedMember extends Member {
 	String reason;
-	
-	public StrikedMember(String name, Long id, String reason) {
+	ArrayList<String> reasons;
+
+	public StrikedMember(String name, long id, String reason) {
 		super(name, id);
-		this.reason = reason;
+		reasons = new ArrayList<String>();
+		reasons.add(reason);
+	}
+
+	public boolean isStriked() {
+		return reasons.size()!=0;
 	}
 
 }

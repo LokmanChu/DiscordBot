@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Scanner;
 import java.util.concurrent.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class BlockedWords {
     Scanner in;
@@ -170,9 +173,29 @@ public class BlockedWords {
 
     public void checkMessage(MessageCreateEvent event) {
         String msg = event.getMessageContent();
-        ArrayList<String> list = tree.messageContains(msg);
+        ArrayList<NodeInfo> list = tree.messageContains(msg);
+
         if (!list.isEmpty()) {
-            event.getMessage().delete("Bad Language");
+            System.out.println(list.get(0).replace);
+            if (list.stream().filter((nodeInfo -> nodeInfo.strike)).count()!=0) {
+                //Strike Person
+            }
+            if (list.stream().filter(nodeInfo -> nodeInfo.channel).count()!=0) {
+                // add to report channel
+            }
+            if (list.stream().filter((nodeInfo -> nodeInfo.delete == true)).count()!=0) {
+                event.getMessage().delete();
+            }
+            else
+            {
+                System.out.println("here");
+                for (NodeInfo node : list) {
+                    if (node.replace) {
+                        msg = msg.replace(node.value,node.replaceValue);
+                    }
+                }
+                event.editMessage(msg);
+            }
         }
     }
 

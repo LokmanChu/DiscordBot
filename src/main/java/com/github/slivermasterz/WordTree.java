@@ -59,25 +59,27 @@ public class WordTree {
         return !node.value.equals("");
     }
 
-    public ArrayList<String> messageContains(String msg) {
-        ArrayList<String> list = new ArrayList<String>(1);
+    public ArrayList<NodeInfo> messageContains(String msg) {
+        ArrayList<NodeInfo> list = new ArrayList<NodeInfo>(1);
 
         int i = 0;
+        int start = 0;
         Node node = root;
         while (i < msg.length()) {
             int index = convertToIndex(msg.charAt(i));
             if (node.contains(index)) {
                 node = node.getChild(index);
                 if (!node.value.equals("") && (msg.length() == i+1 || msg.charAt(i+1) == ' ')) {
-                    list.add(node.value);
+                    NodeInfo temp = new NodeInfo(node);
+                    temp.startIndex = start;
+                    list.add(temp);
                 }
             }
             else {
                 while (msg.length() < i && (msg.charAt(i)!= ' ' || msg.charAt(i)!='\n')) i++;
-                i++;
                 node = root;
+                start = i;
             }
-
             i++;
         }
 
@@ -225,6 +227,52 @@ public class WordTree {
             c-=32;
         }
         return c;
+    }
+}
+
+class NodeInfo {
+    String value;
+    String replaceValue;
+    boolean replace;
+    boolean strike;
+    boolean channel;
+    boolean delete;
+    int startIndex;
+
+    public NodeInfo(Node node) {
+        value = node.value;
+        replaceValue = node.replaceString;
+        setBooleans(node.getBooleans());
+    }
+
+    public void setBooleans(int n) {
+        if (n<0 || n>16) {
+            return;
+        }
+        else {
+            int temp = n;
+            delete = temp%2 == 1;
+            temp/=2;
+            channel = temp%2 == 1;
+            temp/=2;
+            strike = temp%2 == 1;
+            temp/=2;
+            replace = temp%2 == 1;
+        }
+    }
+
+    public int getBooleans() {
+        int result = 0;
+        int base = 1;
+        result += delete? base:0;
+        base*=2;
+        result += channel? base:0;
+        base*=2;
+        result += strike? base:0;
+        base*=2;
+        result += replace? base:0;
+
+        return result;
     }
 }
 

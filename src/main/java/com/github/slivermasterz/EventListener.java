@@ -8,11 +8,17 @@ import java.util.Arrays;
 public class EventListener {
     DiscordApi api;
     BlockedWords blockedWords = new BlockedWords();
-    ReportCommand reportCommand = new ReportCommand(api);
+    ReportCommand reportCommand;
+    MembersListCommands listCommands;
+    Spam spam;
 
     public EventListener(DiscordApi api) {
         this.api = api;
+        reportCommand = new ReportCommand(api);
+        listCommands = new MembersListCommands(api);
+        spam = new Spam(api);
         setupMessageCreateListener();
+        setupReactionAddListener();
     }
 
     public void setupMessageCreateListener()
@@ -41,6 +47,27 @@ public class EventListener {
                     case "report":
                         reportCommand.sendReportPM(event.getMessageAuthor().asUser().get());
                         break;
+                    case "members":
+                        listCommands.viewMembers(event.getChannel());
+                        break;
+                    case "stats":
+                        listCommands.viewStats(event.getChannel());
+                        break;
+                    case "ban":
+                        if (args.length < 2) return;
+                        String name = args[0];
+                        User user = api.getCachedUsersByName(name).iterator().next();
+                        String reason = "";
+                        for (int i = 1; i < args.length; i++) {
+                            reason = reason + args[i] + " ";
+                        }
+                        listCommands.ban(user, reason);
+                        break;
+                    case "striked?":
+                        if (listCommands.list.contains(author.getId())) {
+                            System.out.println(listCommands.list.getMember(author.getId()).isStriked());
+                        }
+                        break;
                     default:
                         event.getChannel().sendMessage("Command not found");
                         break;
@@ -51,8 +78,17 @@ public class EventListener {
             }
             else {
                 blockedWords.checkMessage(event);
+                spam.spamCheck(event);
             }
         });
+    }
+
+    public void onServerMemberJoin()
+    {
+        api.addServerMemberJoinListener(event -> {
+            listCommands.memberJoin(event.getUser());
+        });
+
     }
 
     public void setupReactionAddListener() {
