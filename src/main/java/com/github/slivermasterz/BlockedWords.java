@@ -19,7 +19,7 @@ public class BlockedWords {
 
     public BlockedWords() {
         tree = new WordTree();
-        file = new File("BannedWords.txt");
+        file = new File("/Users/Albert/eclipse-workspace/discordbotmain/data/BannedWords.txt");
         readWords();
     }
 

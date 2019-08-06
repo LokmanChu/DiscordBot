@@ -48,8 +48,10 @@ public class MembersListTest {
 		list.add(m1);
 		list.add(m2);
 		list.add(m3);
-		list.remove(m1);
-		list.remove(m2);
+		Member m4 = new Member("Obama", (long) 123456789);
+		Member m5 = new Member("Kobe", (long) 123456788);
+		list.remove(m4.getId());
+		list.remove(m5.getId());
 		assertEquals(false, list.contains(m1.getId()));
 		assertEquals(false, list.contains(m2.getId()));
 		assertEquals(true, list.contains(m3.getId()));

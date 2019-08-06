@@ -1,10 +1,7 @@
 package com.github.aqml15.discordbot;
 
 import java.io.PipedOutputStream;
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.function.Consumer;
 
@@ -14,7 +11,7 @@ import java.util.function.Consumer;
  */
 public class WordTree {
 
-    Node root;
+    public Node root;
     boolean writeLock;
 
     public WordTree() {

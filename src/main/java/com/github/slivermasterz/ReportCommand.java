@@ -23,6 +23,8 @@ import org.javacord.api.entity.server.Server;
 
         DiscordApi api;
         ArrayList<User> pendingReporters;
+        String offender;
+        String reportMessage;
 
         public ReportCommand(DiscordApi api) {
             this.api = api;
@@ -59,8 +61,8 @@ import org.javacord.api.entity.server.Server;
                 pendingReporters.add(author);
                 author.openPrivateChannel().get().sendMessage(
                         "To Report a User for breaking the rules, please reply to this DM with the following format:\n"
-                                + "[!!! <userid to be reported> : <'Message breaking the rule'>]\n"
-                                + "[Example: !!! JohnDoe : 'What the ****!']"
+                                + "[<userid to be reported> : <'Message breaking the rule'>]\n"
+                                + "[Example: JohnDoe : 'What the ****!']"
                 );
             }
             catch(Exception e) {
@@ -70,51 +72,40 @@ import org.javacord.api.entity.server.Server;
 
         public void addPMReport(User author, String message) {
             // Check if receiving message is DM, if so paste message into a private channel for review later
-            Channel channel = api.getChannelsByName("reports").iterator().next();
-            System.out.println("channel: " + channel + " ... " + channel.toString());
+            Channel channel = api.getServerTextChannelsByName("reports").iterator().next();
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date date = new Date();
             String fullDate = dateFormat.format(date);
-            String offender = message.split("\\s+")[1];
-            String reportMessage = "";
+            offender = message.split("\\s+")[0];
             String[] collection = message.split("\\s+");
-            for (int i = 3; i < collection.length; i++) {
-                reportMessage = reportMessage + " " + collection[i];
+            for (int i = 2; i < collection.length; i++) {
+                reportMessage = reportMessage + collection[i] + " ";
             }
-            offender = offender.substring(0, offender.length() - 1);
-
-            if (message.startsWith("!!!", 0)) {
-                System.out.println("NAME: " + offender);
-                System.out.println(date);
-                if (api.getCachedUsersByName(offender).size() < 1) {
-                    System.out.println("Error! This USER does not exist!");
-                } else {
-                    new MessageBuilder()
-                            .append("Report!", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
-                            .setEmbed(new EmbedBuilder()
-                                    .setTitle(fullDate)
-                                    .setDescription("Report!\n" + "Reporter: " + author + "\nOffender: " + api.getCachedUsersByName(offender).iterator().next() + "\nMessage: " + reportMessage)
-                                    .setColor(Color.ORANGE))
-                            .send((TextChannel) channel);
-                }
+            reportMessage = reportMessage.substring(4,reportMessage.length());
+            System.out.println(offender);
+            if (api.getCachedUsersByName(offender).size() < 1) {
+                System.out.println("Error! This USER does not exist!");
             } else {
-                System.out.println("Incorrect Formatting, Please Try Again!");
+                new MessageBuilder()
+                        .append("Report!", MessageDecoration.BOLD, MessageDecoration.UNDERLINE)
+                        .setEmbed(new EmbedBuilder()
+                                .setTitle(fullDate)
+                                .setDescription("Report!\n" + "Reporter: " + author + "\nOffender: " + api.getCachedUsersByName(offender).iterator().next() + "\nMessage: " + reportMessage)
+                                .setColor(Color.ORANGE))
+                        .send((TextChannel) channel);
             }
-            System.out.println(author.getName() + " -> PM CONTENT -> " + message);
-
+                
         }
 
 
         //TODO: Strike Offender
         public void strikeOffender() {
-            api.getTextChannelsByName("reports").iterator().next().sendMessage("Striked Boi!");
-            System.out.println("*****");
+            api.getTextChannelsByName("reports").iterator().next().sendMessage("Striked!");
         }
 
         //TODO: Disregard Report
         public void disregardReport() {
-            api.getTextChannelsByName("reports").iterator().next().sendMessage("Disregarded Boi!");
-            System.out.println("*****");
+            api.getTextChannelsByName("reports").iterator().next().sendMessage("Safe!");
         }
 
 

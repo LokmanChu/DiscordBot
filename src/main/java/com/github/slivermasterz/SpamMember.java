@@ -3,6 +3,10 @@ package com.github.aqml15.discordbot;
 import java.util.ArrayList;
 
 public class SpamMember extends Member {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5766164508151345840L;
 	int strikes;
 	int noMessage;
 	ArrayList<Long> times;

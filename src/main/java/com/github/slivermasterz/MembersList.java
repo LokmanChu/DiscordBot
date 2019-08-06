@@ -1,65 +1,71 @@
 package com.github.aqml15.discordbot;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 
 /*
  * MembersList implements a Tree Map to keep track of members and order alphabetically.
  */
-public class MembersList {
+public class MembersList implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7545869819593866005L;
 	Map<Long, ArrayList<Member>> map;
 	int size = 0;
 	String print = "";
-	String file = "/Users/Albert/eclipse-workspace/discordbot/data/data.properties";
-	Properties properties;
+	File f = new File("/Users/Albert/eclipse-workspace/discordbotmain/data/MembersList.txt");
 	
 	/**
 	 * Init
 	 */
 	public MembersList() {
 		map = new HashMap<Long, ArrayList<Member>>();
-		properties = new Properties();
 		read();
 	}
 	
-	public void write() {		
-		for (Map.Entry<Long, ArrayList<Member>> entry : map.entrySet()){
-            properties.put(entry.getKey().toString(), entry.getValue().toString());
-        }
-
+	public void write() {	
+		FileOutputStream fos;
 		try {
-			properties.store(new FileOutputStream(file), null);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			fos = new FileOutputStream(f);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(map);
+			oos.close();
+			fos.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void read() {
+		FileInputStream fis;
 		try {
-			properties.load(new FileInputStream(file));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
+			fis = new FileInputStream(f);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			map = (HashMap) ois.readObject();
+			ois.close();
+			fis.close();
+		} catch (ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		map = (Map)properties;
-		
 	}
+	
 	
 	/**
 	 * Adds Member
@@ -88,15 +94,20 @@ public class MembersList {
 	 * Removes member
 	 * @param value Member
 	 */
-	public void remove(Member value) {
-		if (map.containsKey(value.id % 113)) {
-			if (map.get(value.id % 113).size() > 0) {
-				map.get(value.id % 113).remove(value);
-				size--;
+	public void remove(Long id) {
+		if (map.containsKey(id % 113)) {
+			ArrayList<Member> list = map.get(id % 113);
+			if (list.size() > 0) {
+				for (int i = 0; i < list.size(); i++) {
+					if (list.get(i).id == id) {
+						list.remove(i);
+						size--;
+					}
+				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns size of list
 	 * @return int size
@@ -140,6 +151,12 @@ public class MembersList {
 	public void clear() {
 		map.clear();
 		size = 0;
+		try {
+			PrintWriter pw = new PrintWriter(f);
+			pw.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	
@@ -153,12 +170,12 @@ public class MembersList {
 		while (it.hasNext()) {
 			ArrayList<Member> memList = (ArrayList<Member>) it.next();
 			for (int i = 0; i < memList.size(); i++) {
-				print = print + "Name: " + memList.get(i).name + " || ID: " + memList.get(i).id + "\n";
+				print = print + "Name: " + memList.get(i).name + ", ID: " + memList.get(i).id + "\n";
 			}
 		}
 		return print;
 	}
-	
+
 	/**
 	 * Prints member's statistics
 	 * @return String
@@ -169,29 +186,10 @@ public class MembersList {
 		while (it.hasNext()) {
 			ArrayList<Member> memList = (ArrayList<Member>) it.next();
 			for (int i = 0; i < memList.size(); i++) {
-				print = print + "Name: " + memList.get(i).name + ", ID: " + memList.get(i).id + ", # Messages: " + memList.get(i).count + "\n";
+				print = print + "Name: " + memList.get(i).name + ", ID: " + memList.get(i).id + ", # Messages: " + memList.get(i).count + ", Age: " + memList.get(i).age/84000 + " days" + "\n";
 			}
 		}
 		return print;
-	}
-	
-	public static void main(String a[]) {
-		MembersList list = new MembersList();
-		
-		Member bob = new Member("bob", (long) 123456789);
-		Member jon = new Member("jon", (long) 123456777);
-		
-		list.add(bob);
-		list.add(jon);
-		
-		System.out.println("list: " + "\n" + list.print());
-		
-		list.write();
-		MembersList list2 = new MembersList();
-		list2.read();
-		
-		System.out.println("list2: " + "\n" + list.print());
-		
 	}
 
 }

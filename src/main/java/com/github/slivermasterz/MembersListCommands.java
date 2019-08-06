@@ -22,12 +22,40 @@ public class MembersListCommands {
 		list.add(new Member(user.getName(), user.getId()));
 	}
 	
+	public void remove(User user) {
+		list.remove(user.getId());
+	}
+	
 	public void ban(User user, String reason) {
 		StrikedMember offender = new StrikedMember(user.getName(), user.getId(), reason);
 		if (list.contains(user.getId())) {
-			list.remove(list.getMember(user.getId()));
+			System.out.println("found in list");
+			list.remove(user.getId());
 		}
 		list.add(offender);
+		user.addRole(api.getRolesByName("Chat Restrict").iterator().next());
+	}
+	
+	public void unBan(User user) {
+		Member member = new Member(user.getName(), user.getId());
+		if (list.contains(user.getId())) {
+			System.out.println("found in list");
+			list.remove(user.getId());
+		}
+		list.add(member);
+		user.removeRole(api.getRolesByName("Chat Restrict").iterator().next());
+	}
+	
+	public Member get(User user) {
+		return list.getMember(user.getId());
+	}
+	
+	public void write() {
+		list.write();
+	}
+	
+	public void read() {
+		list.read();
 	}
 
 	/**
@@ -35,8 +63,8 @@ public class MembersListCommands {
 	 * @param list
 	 */
 	public void viewMembers(Channel channel) {
+		channel.asTextChannel().get().sendMessage("Viewing Members...");
 		channel.asTextChannel().get().sendMessage(list.print());
-		channel.asTextChannel().get().sendMessage("no");
 	}
 	
 	/**
@@ -44,6 +72,7 @@ public class MembersListCommands {
 	 * @param list
 	 */
 	public void viewStats(Channel channel) {
+		channel.asTextChannel().get().sendMessage("Viewing Stats...");
 		channel.asTextChannel().get().sendMessage(list.printStats());
 	}
 	
@@ -60,9 +89,12 @@ public class MembersListCommands {
 	 * Removes member from list on leave
 	 */
 	public void memberLeave(User user) {
-		Member member = new Member(user.getName(), user.getId());
-		list.remove(member);		
+		list.remove(user.getId());		
 		list.write();
+	}
+	
+	public void countUp(User user) {
+		list.getMember(user.getId()).increase();
 	}
 	
 }

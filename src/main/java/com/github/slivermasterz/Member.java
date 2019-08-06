@@ -1,9 +1,16 @@
 package com.github.aqml15.discordbot;
 
-public class Member {
+import java.io.Serializable;
+
+public class Member implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3850255598684225612L;
 	String name;
 	long id;
 	int count = 0;
+	long age = 0;
 	
 	/**
 	 * Init
@@ -19,7 +26,7 @@ public class Member {
 	 * Checks if striked
 	 * @return Boolean
 	 */
-	public Boolean isStriked() {
+	public boolean isStriked() {
 		return false;
 	}
 	
@@ -52,5 +59,9 @@ public class Member {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	public void setAge(Long age) {
+		this.age = age.intValue();
 	}
 }
