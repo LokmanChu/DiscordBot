@@ -8,6 +8,7 @@ import java.util.Date;
 
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageDecoration;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -23,36 +24,14 @@ public class ReportCommand {
 
     DiscordApi api;
     ArrayList<User> pendingReporters;
+    String offender;
+    String reportMessage;
 
     public ReportCommand(DiscordApi api) {
         this.api = api;
         pendingReporters = new ArrayList<User>(4);
     }
 
-    public void setupReportChannel() {
-        Server server = api.getServers().iterator().next();
-
-        // Creates Mod role if none exists
-        Permissions modPermissions = new PermissionsBuilder().setAllAllowed().build();
-        Permissions noPermissions = new PermissionsBuilder().setAllDenied().build();
-        Role mod = null;
-
-        if (server.getRolesByName("Mod").size() == 0) {
-            mod = server.createRoleBuilder().setName("Mod").setPermissions(modPermissions).setColor(Color.CYAN).create().join();
-            mod.addUser(server.getOwner(), "Owner is Moderator");
-        }
-
-        // Creates Private Report Channel if none exists
-        if (server.getChannelsByName("reports").size() == 0) {
-            ServerTextChannelBuilder reports = server.createTextChannelBuilder();
-            System.out.println(server.getTextChannels());
-            reports.setName("reports");
-            reports.addPermissionOverwrite(mod, modPermissions);
-            reports.addPermissionOverwrite(server.getEveryoneRole(), noPermissions);
-            reports.create().join();
-            System.out.println("Report Channel successfully created...");
-        }
-    }
 
     public void sendReportPM(User author){
         try {
@@ -95,7 +74,11 @@ public class ReportCommand {
                             .setTitle(fullDate)
                             .setDescription("Report!\n" + "Reporter: " + author + "\nOffender: " + api.getCachedUsersByName(offender).iterator().next() + "\nMessage: " + reportMessage)
                             .setColor(Color.ORANGE))
-                    .send((TextChannel) channel);
+                    .send((TextChannel) channel)
+                    .thenAcceptAsync((Message msg)->{
+                        msg.addReaction("👍");
+                        msg.addReaction("👎");
+                    });
         }
 
         System.out.println(author.getName() + " -> PM CONTENT -> " + message);

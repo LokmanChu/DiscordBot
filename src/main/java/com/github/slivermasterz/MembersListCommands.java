@@ -22,7 +22,7 @@ public class MembersListCommands {
 		list.add(new Member(user.getName(), user.getId()));
 	}
 
-	public void ban(User user, String reason) {
+	public void strike(User user, String reason) {
 		StrikedMember offender = new StrikedMember(user.getName(), user.getId(), reason);
 		if (list.contains(user.getId())) {
 			list.remove(list.getMember(user.getId()));

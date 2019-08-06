@@ -7,12 +7,8 @@ import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Scanner;
 import java.util.concurrent.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class BlockedWords {
     Scanner in;
@@ -20,12 +16,14 @@ public class BlockedWords {
     PipedInputStream pis;
     PipedOutputStream pos;
     File file;
+    MembersListCommands listCommands;
 
     WordTree tree;
 
-    public BlockedWords() {
+    public BlockedWords(MembersListCommands listCommands) {
         tree = new WordTree();
         file = new File("BannedWords.txt");
+        this.listCommands = listCommands;
         readWords();
     }
 
@@ -178,7 +176,7 @@ public class BlockedWords {
         if (!list.isEmpty()) {
             System.out.println(list.get(0).replace);
             if (list.stream().filter((nodeInfo -> nodeInfo.strike)).count()!=0) {
-                //Strike Person
+                listCommands.strike(event.getMessageAuthor().asUser().get(),msg);
             }
             if (list.stream().filter(nodeInfo -> nodeInfo.channel).count()!=0) {
                 // add to report channel
@@ -198,16 +196,4 @@ public class BlockedWords {
             }
         }
     }
-
-
-    public static void main(String[] args) throws java.io.IOException {
-        BlockedWords b = new BlockedWords();
-        //b.tree.insert("fuck",8,"****");
-        //b.tree.insert("bitch", 8,"");
-        b.writeWords();
-        System.out.println(b.tree.size());
-        b.tree.traverse(b.tree.root,System.out::println);
-
-    }
-
 }

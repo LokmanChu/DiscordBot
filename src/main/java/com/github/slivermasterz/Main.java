@@ -13,6 +13,7 @@ public class Main {
         DiscordApi api = new DiscordApiBuilder().setToken(token).login().join();
         System.out.println(api.createBotInvite());
 
+        new Setup(api);
         new EventListener(api);
     }
 }

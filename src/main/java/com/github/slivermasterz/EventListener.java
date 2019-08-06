@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class EventListener {
     DiscordApi api;
-    BlockedWords blockedWords = new BlockedWords();
+    BlockedWords blockedWords;
     ReportCommand reportCommand;
     MembersListCommands listCommands;
     Spam spam;
@@ -17,7 +17,9 @@ public class EventListener {
         reportCommand = new ReportCommand(api);
         listCommands = new MembersListCommands(api);
         spam = new Spam(api);
+        blockedWords = new BlockedWords(listCommands);
         setupMessageCreateListener();
+        onServerMemberJoin();
         setupReactionAddListener();
     }
 
@@ -53,7 +55,7 @@ public class EventListener {
                     case "stats":
                         listCommands.viewStats(event.getChannel());
                         break;
-                    case "ban":
+                    case "strike":
                         if (args.length < 2) return;
                         String name = args[0];
                         User user = api.getCachedUsersByName(name).iterator().next();
@@ -61,7 +63,7 @@ public class EventListener {
                         for (int i = 1; i < args.length; i++) {
                             reason = reason + args[i] + " ";
                         }
-                        listCommands.ban(user, reason);
+                        listCommands.strike(user, reason);
                         break;
                     case "striked?":
                         if (listCommands.list.contains(author.getId())) {
