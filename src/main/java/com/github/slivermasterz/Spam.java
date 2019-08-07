@@ -7,15 +7,25 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.user.User;
+import org.javacord.api.event.message.MessageCreateEvent;
+
 public class Spam {
 
 	DiscordApi api;
 	int warnBuffer = 3;
 	int banBuffer = 5;
-	long interval = 2000;
+	long interval = 1800;
 	String warningMessage = "stop spamming!";
-	String banMessage = "has been banned for spamming.";
+	String banMessage = "has been banned for spamming for 5 minutes.";
 	SpamList list;
+	static Timer timer = new Timer();
+	static int seconds = 0;
+	static int MAX_SECONDS = 60;
 
 
 	public Spam(DiscordApi api) {
@@ -25,52 +35,63 @@ public class Spam {
 
 	public void spamCheck(MessageCreateEvent event) {
 		User user = event.getMessageAuthor().asUser().get();
-		System.out.println(event.getMessage().getCreationTimestamp().toEpochMilli());
+		SpamMember spamMember;
 
-		if (exist(user)) {
-			list.get(user.getName()).increaseMessage();
-			list.get(user.getName()).addTime(event.getMessage().getCreationTimestamp().toEpochMilli());
+		if (!exist(user)) add(user);
+
+		spamMember = list.get(user.getName());
+		spamMember.increaseMessage();
+		spamMember.addTime(event.getMessage().getCreationTimestamp().toEpochMilli());
+
+		if (spamMember.getStrike() == banBuffer) {
+			event.getChannel().sendMessage(sendBan(user));
+			banHammer(spamMember);
 		}
-
-		else {
-			add(user);
-			list.get(user.getName()).increaseMessage();
-			list.get(user.getName()).addTime(event.getMessage().getCreationTimestamp().toEpochMilli());
-		}
-
-		if (list.get(user.getName()).getStrike() == banBuffer + 1) {
+		if (spamMember.getStrike() >= banBuffer) {
+			event.deleteMessage();
 			return;
 		}
 
-		long time = list.get(user.getName()).calculateTime();
-		int count = list.get(user.getName()).getNoMessage();
+		long time = spamMember.calculateTime();
+		int count = spamMember.getNoMessage();
 
 		if (time <= interval && count >= warnBuffer) {
-			list.get(user.getName()).strike();
-			list.get(user.getName()).clearTime();
-			list.get(user.getName()).setNoMessage(0);
+			spamMember.strike();
+			spamMember.clearTime();
+			spamMember.setNoMessage(0);
 			System.out.println("Spam detected");
 			event.getChannel().sendMessage(sendWarning(user));
 		}
 
 		else if (time > interval) {
-			list.get(user.getName()).clearTime();
-			list.get(user.getName()).setNoMessage(0);
+			spamMember.clearTime();
+			spamMember.setNoMessage(0);
 		}
 	}
 
-	public void spamStrikeTest(MessageCreateEvent event) {
-		User user = event.getMessageAuthor().asUser().get();
-		if (list.get(user.getName()).getStrike() == banBuffer) {
-			System.out.println("Ban");
-			event.getChannel().sendMessage(sendBan(user));
-			list.get(user.getName()).strike();
-			event.deleteMessage();
-		}
+	public static void banHammer(SpamMember offender) {
+		TimerTask task;
 
-		else if (list.get(user.getName()).getStrike() == banBuffer + 1) {
-			event.deleteMessage();
-		}
+		task = new TimerTask() {
+
+			@Override
+			public void run() {
+				if (seconds < MAX_SECONDS) {
+					seconds++;
+				} else {
+					offender.setStrike(0);
+					offender.clearTime();
+					offender.setNoMessage(0);
+					cancel();
+				}
+			}
+		};
+		offender.strike();
+		timer.schedule(task,  0, 1000);
+	}
+
+	public void setBanTime(int seconds) {
+		MAX_SECONDS = seconds;
 	}
 
 	public void add(User user) {

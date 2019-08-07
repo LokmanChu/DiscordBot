@@ -45,8 +45,8 @@ public class MemberListTest {
         list.add(m1);
         list.add(m2);
         list.add(m3);
-        list.remove(m1);
-        list.remove(m2);
+        list.remove(m1.id);
+        list.remove(m2.id);
         assertEquals(false, list.contains(m1.getId()));
         assertEquals(false, list.contains(m2.getId()));
         assertEquals(true, list.contains(m3.getId()));

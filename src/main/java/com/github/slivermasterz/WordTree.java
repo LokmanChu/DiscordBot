@@ -1,10 +1,7 @@
 package com.github.slivermasterz;
 
 import java.io.PipedOutputStream;
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.function.Consumer;
 
@@ -324,6 +321,10 @@ class Node {
     }
 
     public void addSorted(int index) {
+        if (children.size() == 0) {
+            add(index);
+            return;
+        }
         Node node = new Node("");
         int i;
         for (i = 0; i < children.size(); i++) {

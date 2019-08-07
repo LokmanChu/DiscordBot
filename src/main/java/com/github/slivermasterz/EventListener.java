@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class EventListener {
     DiscordApi api;
-    BlockedWords blockedWords = new BlockedWords();
+    BlockedWords blockedWords;
     ReportCommand reportCommand;
     MembersListCommands listCommands;
     Spam spam;
@@ -17,7 +17,9 @@ public class EventListener {
         reportCommand = new ReportCommand(api);
         listCommands = new MembersListCommands(api);
         spam = new Spam(api);
+        blockedWords = new BlockedWords(listCommands,reportCommand);
         setupMessageCreateListener();
+        onServerMemberJoin();
         setupReactionAddListener();
     }
 
@@ -35,13 +37,14 @@ public class EventListener {
                 args = Arrays.copyOfRange(args, 1, args.length);
 
                 switch (cmd) {
-                    case "list":
+                    case "listWords":
                          blockedWords.listWords(event.getChannel());
                         break;
-                    case "add":
-                        blockedWords.tree.insert(args[0]);
+                    case "addWord":
+                        if (args.length == 1) blockedWords.addWords(args[0],event.getChannel());
+                        else blockedWords.addWords(args[0],args[1],event.getChannel());
                         break;
-                    case "remove":
+                    case "removeWord":
                         blockedWords.tree.delete(args[0]);
                         break;
                     case "report":
@@ -54,19 +57,50 @@ public class EventListener {
                         listCommands.viewStats(event.getChannel());
                         break;
                     case "ban":
-                        if (args.length < 2) return;
+                        if (args.length < 2) {
+                            event.getChannel().sendMessage("Command too short, please add reason");
+                            return;
+                        }
                         String name = args[0];
                         User user = api.getCachedUsersByName(name).iterator().next();
                         String reason = "";
-                        for (int i = 1; i < args.length; i++) {
+                        for (int i = 2; i < args.length; i++) {
                             reason = reason + args[i] + " ";
                         }
-                        listCommands.ban(user, reason);
+                        listCommands.strike(user, reason);
                         break;
-                    case "striked?":
-                        if (listCommands.list.contains(author.getId())) {
-                            System.out.println(listCommands.list.getMember(author.getId()).isStriked());
+                    case "unban":
+                        String member = args[0];
+                        User us = api.getCachedUsersByName(member).iterator().next();
+                        listCommands.unStrike(us);
+                        break;
+                    case "ban?":
+                        if (args.length < 1) {
+                            event.getChannel().sendMessage("Command too short, please add name");
+                            return;
                         }
+                        User check = api.getCachedUsersByName(args[0]).iterator().next();
+                        if (listCommands.list.contains(check.getId())) {
+                            event.getChannel().sendMessage("Ban Status: " + listCommands.get(check).isStriked());
+                        }
+                        break;
+                    case "changespamtime":
+                        spam.setBanTime(Integer.parseInt(args[0]));
+                        event.getChannel().sendMessage("Spam mute time changed!");
+                        break;
+                    case "addMember":
+                        System.out.println(args[0]);
+                        listCommands.add(api.getCachedUsersByName(args[0]).iterator().next());
+                        listCommands.write();
+                        break;
+                    case "removeMember":
+                        System.out.println(args[0]);
+                        listCommands.remove((api.getCachedUsersByName(args[0]).iterator().next()));
+                        listCommands.write();
+                        break;
+                    case "save":
+                        listCommands.write();
+                        event.getChannel().sendMessage("Saved...");
                         break;
                     default:
                         event.getChannel().sendMessage("Command not found");
@@ -78,8 +112,16 @@ public class EventListener {
             }
             else {
                 blockedWords.checkMessage(event);
-                spam.spamCheck(event);
             }
+
+            if (listCommands.get(author)==null) {
+                listCommands.add(author);
+            }
+            if (listCommands.get(author).creationDate == -1) {
+                listCommands.get(author).setCreationDate(author.getCreationTimestamp().getEpochSecond());
+            }
+            listCommands.get(author).increase();
+            spam.spamCheck(event);
         });
     }
 
@@ -93,12 +135,18 @@ public class EventListener {
 
     public void setupReactionAddListener() {
         api.addReactionAddListener(event -> {
+            User author = event.getUser();
+            if (author.isBot()) {
+                System.out.println("bot");
+                return;
+            }
             if (event.getChannel() == event.getApi().getChannelsByName("reports").iterator().next()) {
                 if (event.getEmoji().equalsEmoji("👍")) {
-                    reportCommand.strikeOffender();
-
+                    api.getTextChannelsByName("reports").iterator().next().sendMessage("Striked!");
+                    ReportCommand.Report report = reportCommand.activeReports.stream().filter(report1 -> report1.messageId == event.getMessage().get().getId()).iterator().next();
+                    listCommands.strike(report.offender, report.reportMessage);
                 } else if (event.getEmoji().equalsEmoji("👎")) {
-                    reportCommand.disregardReport();
+                    api.getTextChannelsByName("reports").iterator().next().sendMessage("Safe!");
                 }
             }
         });

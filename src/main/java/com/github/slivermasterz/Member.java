@@ -1,56 +1,73 @@
 package com.github.slivermasterz;
 
-public class Member {
-	String name;
-	long id;
-	int count = 0;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Date;
 
-	/**
-	 * Init
-	 * @param name
-	 * @param id
-	 */
-	public Member(String name, long id) {
-		this.name = name;
-		this.id = id;
-	}
+public class Member implements Serializable {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 3850255598684225612L;
+    String name;
+    long id;
+    int count = 0;
+    long creationDate = -1;
 
-	/**
-	 * Checks if striked
-	 * @return Boolean
-	 */
-	public boolean isStriked() {
-		return false;
-	}
+    /**
+     * Init
+     * @param name
+     * @param id
+     */
+    public Member(String name, long id) {
+        this.name = name;
+        this.id = id;
+    }
 
-	/**
-	 *
-	 * @return int count
-	 */
-	public int count() {
-		return count;
-	}
+    /**
+     * Checks if striked
+     * @return Boolean
+     */
+    public boolean isStriked() {
+        return false;
+    }
 
-	/**
-	 * Increase count
-	 */
-	public void increase() {
-		count++;
-	}
+    /**
+     *
+     * @return int count
+     */
+    public int count() {
+        return count;
+    }
 
-	/**
-	 * Get id
-	 * @return Long id
-	 */
-	public long getId() {
-		return id;
-	}
+    /**
+     * Increase count
+     */
+    public void increase() {
+        count++;
+    }
 
-	/**
-	 * Set id
-	 * @param id
-	 */
-	public void setId(long id) {
-		this.id = id;
-	}
+    /**
+     * Get id
+     * @return Long id
+     */
+    public long getId() {
+        return id;
+    }
+
+    /**
+     * Set id
+     * @param id
+     */
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setCreationDate(long creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public long age() {
+        return Instant.now().toEpochMilli() - creationDate;
+    }
 }

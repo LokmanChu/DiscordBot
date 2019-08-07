@@ -1,18 +1,15 @@
 package com.github.slivermasterz;
 
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.user.User;
 import org.javacord.api.event.Event;
 import org.javacord.api.event.channel.ChannelEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Scanner;
 import java.util.concurrent.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class BlockedWords {
     Scanner in;
@@ -20,12 +17,23 @@ public class BlockedWords {
     PipedInputStream pis;
     PipedOutputStream pos;
     File file;
+    MembersListCommands listCommands;
+    ReportCommand reportCommands;
 
     WordTree tree;
 
-    public BlockedWords() {
+    public BlockedWords(MembersListCommands listCommands,ReportCommand reportCommands) {
         tree = new WordTree();
         file = new File("BannedWords.txt");
+        try {
+            if (!file.exists()) file.createNewFile();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        this.listCommands = listCommands;
+        this.reportCommands = reportCommands;
         readWords();
     }
 
@@ -167,8 +175,32 @@ public class BlockedWords {
     }
 
     public void addWords(String word, TextChannel channel) {
-        tree.insertSorted(word);
-        channel.sendMessage("\"" + word + "\"" + " has been added successfully");
+        addWords(word,"r",channel);
+    }
+
+    //R: Report, S: Strike, D: Delete
+    public void addWords(String word, String args, TextChannel channel) {
+        boolean r,s,d;
+        args = args.toLowerCase();
+        r = args.indexOf('r')!=-1;
+        s = args.indexOf('s')!=-1;
+        d = args.indexOf('d')!=-1;
+
+        int result = 0;
+        int base = 1;
+        result += d? base:0;
+        base*=2;
+        result += r? base:0;
+        base*=2;
+        result += s? base:0;
+
+        System.out.println(result);
+
+        tree.insertSorted(word,result,"");
+        channel.sendMessage("\"" + word + "\""
+                + " has been added successfully to be " +
+                (r ? "Reported ":"") + (s ? "Striked ":"") + (d ? "Deleted ":""));
+        writeWords();
     }
 
     public void checkMessage(MessageCreateEvent event) {
@@ -178,36 +210,14 @@ public class BlockedWords {
         if (!list.isEmpty()) {
             System.out.println(list.get(0).replace);
             if (list.stream().filter((nodeInfo -> nodeInfo.strike)).count()!=0) {
-                //Strike Person
+                listCommands.strike(event.getMessageAuthor().asUser().get(),msg);
             }
             if (list.stream().filter(nodeInfo -> nodeInfo.channel).count()!=0) {
-                // add to report channel
+                reportCommands.addReport(event.getApi().getYourself(),event.getMessageAuthor().asUser().get(),event.getMessageContent());
             }
             if (list.stream().filter((nodeInfo -> nodeInfo.delete == true)).count()!=0) {
                 event.getMessage().delete();
             }
-            else
-            {
-                System.out.println("here");
-                for (NodeInfo node : list) {
-                    if (node.replace) {
-                        msg = msg.replace(node.value,node.replaceValue);
-                    }
-                }
-                event.editMessage(msg);
-            }
         }
     }
-
-
-    public static void main(String[] args) throws java.io.IOException {
-        BlockedWords b = new BlockedWords();
-        //b.tree.insert("fuck",8,"****");
-        //b.tree.insert("bitch", 8,"");
-        b.writeWords();
-        System.out.println(b.tree.size());
-        b.tree.traverse(b.tree.root,System.out::println);
-
-    }
-
 }
