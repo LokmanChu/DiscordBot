@@ -4,6 +4,7 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.user.User;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class EventListener {
     DiscordApi api;
@@ -56,7 +57,7 @@ public class EventListener {
                     case "stats":
                         listCommands.viewStats(event.getChannel());
                         break;
-                    case "ban":
+                    case "strike":
                         if (args.length < 2) {
                             event.getChannel().sendMessage("Command too short, please add reason");
                             return;
@@ -64,24 +65,34 @@ public class EventListener {
                         String name = args[0];
                         User user = api.getCachedUsersByName(name).iterator().next();
                         String reason = "";
-                        for (int i = 2; i < args.length; i++) {
+                        for (int i = 1; i < args.length; i++) {
                             reason = reason + args[i] + " ";
                         }
                         listCommands.strike(user, reason);
                         break;
-                    case "unban":
+                    case "unmute":
                         String member = args[0];
                         User us = api.getCachedUsersByName(member).iterator().next();
-                        listCommands.unStrike(us);
+                        listCommands.unMute(us);
                         break;
-                    case "ban?":
+                    case "striked?":
                         if (args.length < 1) {
                             event.getChannel().sendMessage("Command too short, please add name");
                             return;
                         }
                         User check = api.getCachedUsersByName(args[0]).iterator().next();
                         if (listCommands.list.contains(check.getId())) {
-                            event.getChannel().sendMessage("Ban Status: " + listCommands.get(check).isStriked());
+                            Member mem = listCommands.get(check);
+                            final StringBuilder builder = new StringBuilder("Number of Strikes: ");
+                            if (!mem.isStriked()) {
+                                builder.append(0);
+                            }
+                            else {
+                                builder.append(((StrikedMember)mem).reasons.size() + "\n");
+                                ((StrikedMember) mem).reasons.stream().forEach(s->builder.append(s+"\n"));
+                            }
+                            event.getChannel().sendMessage(builder.toString());
+
                         }
                         break;
                     case "changespamtime":

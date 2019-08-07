@@ -58,7 +58,8 @@ public class WordTreeTest {
     public void insertSortedTest() {
         WordTree tree = new WordTree();
         tree.insertSorted("there");
-        assertTrue(tree.root.numWords == 1,"numWords changed by insert");
+        tree.insertSorted("their");
+        assertTrue(tree.root.numWords == 2,"numWords changed by insert");
         assertTrue(tree.contains("there"),"there inserted");
         assertFalse(tree.contains("the"),"the not in tree");
     }

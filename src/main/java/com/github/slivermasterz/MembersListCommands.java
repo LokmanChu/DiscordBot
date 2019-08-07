@@ -28,22 +28,21 @@ public class MembersListCommands {
     }
 
     public void strike(User user, String reason) {
-        StrikedMember offender = new StrikedMember(user.getName(), user.getId(), reason);
-        if (list.contains(user.getId())) {
+        StrikedMember offender;
+        if (list.contains(user.getId()) && !list.getMember(user.getId()).isStriked()) {
             System.out.println("found in list");
+            offender = new StrikedMember(user.getName(), user.getId(), reason);
             list.remove(user.getId());
+            list.add(offender);
         }
-        list.add(offender);
-        user.addRole(api.getRolesByName("Chat Restrict").iterator().next());
+        else {
+            offender = (StrikedMember)list.getMember(user.getId());
+            offender.reasons.add(reason);
+        }
+        if(offender.reasons.size() == 3) user.addRole(api.getRolesByName("Chat Restrict").iterator().next());
     }
 
-    public void unStrike(User user) {
-        Member member = new Member(user.getName(), user.getId());
-        if (list.contains(user.getId())) {
-            System.out.println("found in list");
-            list.remove(user.getId());
-        }
-        list.add(member);
+    public void unMute(User user) {
         user.removeRole(api.getRolesByName("Chat Restrict").iterator().next());
     }
 

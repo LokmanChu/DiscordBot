@@ -321,20 +321,16 @@ class Node {
     }
 
     public void addSorted(int index) {
-        if (children.size() == 0) {
-            add(index);
-            return;
-        }
         Node node = new Node("");
         int i;
         for (i = 0; i < children.size(); i++) {
             if (index < children.get(i).index) {
-                children.add(i,node);
                 break;
             }
         }
-        reindex(i+1);
         node.index = (byte) index;
+        children.add(i,node);
+        reindex(i);
         sorted = true;
     }
 

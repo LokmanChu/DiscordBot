@@ -190,7 +190,7 @@ public class MembersList implements Serializable {
         while (it.hasNext()) {
             ArrayList<Member> memList = (ArrayList<Member>) it.next();
             for (int i = 0; i < memList.size(); i++) {
-                print = print + "Name: " + memList.get(i).name + ", ID: " + memList.get(i).id + ", # Messages: " + memList.get(i).count + ", Age: " + memList.get(i).age()/84000 + " days" + "\n";
+                print = print + "Name: " + memList.get(i).name + ", ID: " + memList.get(i).id + ", # Messages: " + memList.get(i).count + ", Age: " + memList.get(i).age()/84000000 + " days" + "\n";
             }
         }
         return print;
